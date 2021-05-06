@@ -1,1 +1,1 @@
-# DeepArticulationPrrediction-Object_Generation
+# Deep Articulation Prediction - Object Generation
