@@ -3,7 +3,7 @@
 
     <xacro:arg name="parent" default="world"/>
     <xacro:property name="handle_pos_x" value="0.0"/>
-    <xacro:property name="handle_pos_y" value="0.25"/>
+    <xacro:property name="handle_pos_y" value="0.0"/>
     <xacro:property name="handle_pos_z" value="0.0"/>
 
 

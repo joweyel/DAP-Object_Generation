@@ -7,7 +7,7 @@
   <link name="world"/>
   <joint name="handle_door" type="fixed">
     <!-- Hier xyz für door zu handle offset -->
-    <origin rpy="0 0 0" xyz="0.0 0.25 0.0"/>
+    <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
     <parent link="door_plane"/>
     <child link="door_handle"/>
     <axis xyz="0 0 0"/>

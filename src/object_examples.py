@@ -2,6 +2,7 @@ from gibson2.objects.ycb_object import YCBObject
 from gibson2.objects.articulated_object import ArticulatedObject
 import gibson2
 import os
+import sys
 import pybullet as p
 import pybullet_data
 import time
@@ -9,7 +10,7 @@ import time
 
 
 
-def main():
+def main(urdf_input):
     p.connect(p.GUI)
     p.setGravity(0, 0, -9.8)
     p.setTimeStep(1./240.)
@@ -22,7 +23,7 @@ def main():
     # door = os.path.join(gibson2.assets_path, 'models/cabinet/door.urdf')
     # door = 'door.urdf'
     # handle = 'door_handle.urdf'
-    handle = urdf_path + 'out.urdf'
+    handle = urdf_path + urdf_input
 
     # obj_door = ArticulatedObject(filename=door)
     # obj_door.load()
@@ -42,4 +43,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) < 2:
+        print("No urdf specified. Aborting!")
+        exit(-1)
+    urdf_input = sys.argv[1]
+        
+    main(urdf_input)

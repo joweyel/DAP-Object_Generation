@@ -5,14 +5,7 @@
 
     <link name="world" />
 
-
-<!-- door-->
-
     <!-- door-->
-
-
-
-    
     
     <link name="door_plane">
         <inertial>
@@ -23,7 +16,7 @@
         <visual>
             <origin xyz="0 0 0" />
             <geometry>
-                <mesh filename="door2.obj" rpy="0 0 0" />
+                <mesh filename="obj/door2.obj" rpy="0 0 0" />
             </geometry>
             <material name="wood">
             <color rgba ="1 1 1 1"/>
@@ -46,7 +39,7 @@
         <visual>
             <origin xyz="0 0 0" />
             <geometry>
-                <mesh filename="handle_edited.obj" rpy="0 0 0" />
+                <mesh filename="obj/handle_edited.obj" rpy="0 0 0" />
             </geometry>
             <material name="wood">
             <color rgba ="1 1 1 1"/>
