@@ -17,10 +17,12 @@ def main():
     floor = os.path.join(pybullet_data.getDataPath(), "mjcf/ground_plane.xml")
     p.loadMJCF(floor)
 
+    urdf_path = 'urdf_xacro/'
+
     # door = os.path.join(gibson2.assets_path, 'models/cabinet/door.urdf')
     # door = 'door.urdf'
     # handle = 'door_handle.urdf'
-    handle = 'out.urdf'
+    handle = urdf_path + 'out.urdf'
 
     # obj_door = ArticulatedObject(filename=door)
     # obj_door.load()

@@ -19,7 +19,7 @@
         <visual>
             <origin xyz="0 0 0" />
             <geometry>
-                <mesh filename="handle_edited.obj" rpy="0 0 0" />
+                <mesh filename="obj/handle_edited.obj" rpy="0 0 0" />
             </geometry>
             <material name="wood">
             <color rgba ="1 1 1 1"/>
