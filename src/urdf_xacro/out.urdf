@@ -15,11 +15,6 @@
     <limit lower="0.0" upper="1.57"/>
   </joint>
   <link name="door_handle">
-    <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="2.6409912742551773"/>
-      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
-    </inertial>
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
@@ -30,7 +25,13 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <!--<collision>
+    <!--
+            <inertial>
+                <origin xyz="0 0 0" />
+                <mass value="2.6409912742551773" />
+                <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+            </inertial>
+            <collision>
                 <origin xyz="-0.148404 0.486267 4.17233e-07" />
                 <geometry>
                     <mesh filename="handle_edited.obj" rpy="0 0 0" />
@@ -46,11 +47,6 @@
     <limit lower="0.0" upper="1.57"/>
   </joint>
   <link name="door_plane">
-    <inertial>
-      <origin xyz="0 0 0"/>
-      <mass value="2.6409912742551773"/>
-      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
-    </inertial>
     <visual>
       <origin xyz="0 0 0"/>
       <geometry>
@@ -60,7 +56,13 @@
         <color rgba="1 1 1 1"/>
       </material>
     </visual>
-    <!--<collision>
+    <!--
+            <inertial>
+                <origin xyz="0 0 0" />
+                <mass value="2.6409912742551773" />
+                <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+            </inertial>
+            <collision>
                 <origin xyz="-0.148404 0.486267 4.17233e-07" />
                 <geometry>
                     <mesh filename="door2.obj" rpy="0 0 0" />
