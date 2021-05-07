@@ -6,9 +6,6 @@ import sys
 import pybullet as p
 import pybullet_data
 import time
-# import openmesh as om
-
-
 
 def main(urdf_input):
     p.connect(p.GUI)
@@ -18,20 +15,18 @@ def main(urdf_input):
     floor = os.path.join(pybullet_data.getDataPath(), "mjcf/ground_plane.xml")
     p.loadMJCF(floor)
 
-    urdf_path = 'urdf_xacro/'
-
+    # urdf_path = 'urdf_xacro/'
+    # urdf_file = urdf_path + urdf_input
     # door = os.path.join(gibson2.assets_path, 'models/cabinet/door.urdf')
     # door = 'door.urdf'
     # handle = 'door_handle.urdf'
-    handle = urdf_path + urdf_input
-
     # obj_door = ArticulatedObject(filename=door)
     # obj_door.load()
     # obj_door.set_position([0, 0, 0])
 
-    obj_handle = ArticulatedObject(filename=handle)
-    obj_handle.load()
-    obj_handle.set_position([0, 0, 0])
+    obj = ArticulatedObject(filename=urdf_input)
+    obj.load()
+    obj.set_position([0, 0, 0])
 
 
 

@@ -18,9 +18,6 @@
             <geometry>
                 <mesh filename="obj/door2.obj" rpy="0 0 0" />
             </geometry>
-            <material name="wood">
-            <color rgba ="1 1 1 1"/>
-            </material>
         </visual>
         <!--<collision>
             <origin xyz="-0.148404 0.486267 4.17233e-07" />
@@ -41,9 +38,6 @@
             <geometry>
                 <mesh filename="obj/handle_edited.obj" rpy="0 0 0" />
             </geometry>
-            <material name="wood">
-            <color rgba ="1 1 1 1"/>
-            </material>
         </visual>
         <!--<collision>
             <origin xyz="-0.148404 0.486267 4.17233e-07" />
@@ -53,7 +47,7 @@
         </collision>-->
     </link>
 
-    <joint name="door_hinge" type="fixed">
+    <joint name="world_door" type="fixed">
         <origin xyz="0 0 1" rpy="0 0 0" />
         <parent link="world" />
         <child link="door_plane" />
@@ -62,7 +56,7 @@
         <limit lower="0.0" upper="1.57"/>
     </joint>
     
-    <joint name="door_handle_connect" type="fixed">
+    <joint name="door_handle" type="fixed">
         <origin xyz="0 0 0" rpy="0 0 0" />
         <parent link="door_plane" />
         <child link="door_handle" />

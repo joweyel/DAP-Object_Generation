@@ -1,32 +1,27 @@
 # Deep Articulation Prediction - Object Generation
 
+[IP-Schedule](https://docs.google.com/spreadsheets/d/1GPGc1VRir2_0YGq6VjJ9RfIrRQXC3QqPH-WfqKRBgtw/edit?pli=1#gid=0)
+
 ## Convert xacro file to urdf file (executed from `src` directory)
 ```rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf```
 
-[IP-Schedule](https://docs.google.com/spreadsheets/d/1GPGc1VRir2_0YGq6VjJ9RfIrRQXC3QqPH-WfqKRBgtw/edit?pli=1#gid=0)
-
-
 ## Tasks: Week 01.05. - 07.05.
-2. Create a URDF with a door link and a handle link and connect them with a fixed joint. Check in Pybullet if it works.
-
-`python3 object_examples.py door.urdf`
+2. Create a [URDF](src/urdf_xacro/door.urdf) with a door link and a handle link and connect them with a fixed joint. Check in Pybullet if it works.<br>
+`python3 object_examples.py urdf_xacro/door.urdf`
 
 3. Create an indepedendent URDF for the Handles (Only a handle link and parameterize base_link).
 See [door_handle.urdf](src/urdf_xacro/door_handle.urdf)
- for single door knob.
+ for single door knob.<br>
+ `python3 object_examples.py urdf_xacro/door_handle.urdf`
 
-4. Try joining both door and handle through Xacro file(Puze is a professional in this). Relevant Files [Xacro](src/urdf_xacro/door_handle.urdf.xacro) & [URDF](src/urdf_xacro/out.urdf)
+4. Try joining both door and handle through Xacro file(Puze is a professional in this). Relevant Files [Xacro](src/urdf_xacro/door_handle.urdf.xacro) & [URDF](src/urdf_xacro/out.urdf)<br>
+`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`<br>
+`python3 object_examples.py urdf_xacro/out.urdf`
 
+5. Use a Xacro to Urdf script (You can find it in the internet or ask puze) and create a unified URDF. Load it in Pybullet<br>
 `rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`
 
-`python3 object_examples.py out.urdf`
-
-5. Use a Xacro to Urdf script (You can find it in the internet or ask puze) and create a unified URDF. Load it in Pybullet
-
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`
-
-For Fast changes to the **Xacro-File** execute the following commant:
-
+For Fast changes to the **Xacro-File** and immediate execution use the following commant:<br>
 `rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf && py object_examples.py out.urdf`
 
 
