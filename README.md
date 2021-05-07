@@ -1,7 +1,5 @@
 # Deep Articulation Prediction - Object Generation
 
-[IP-Schedule](https://docs.google.com/spreadsheets/d/1GPGc1VRir2_0YGq6VjJ9RfIrRQXC3QqPH-WfqKRBgtw/edit?pli=1#gid=0)
-
 ## Convert xacro file to urdf file (executed from `src` directory)
 ```rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf```
 
@@ -22,7 +20,7 @@ See [door_handle.urdf](src/urdf_xacro/door_handle.urdf)
 `rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`
 
 For Fast changes to the **Xacro-File** and immediate execution use the following commant:<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf && py object_examples.py out.urdf`
+`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf && python3 object_examples.py urdf_xacro/out.urdf`
 
 
 ## Important Links
