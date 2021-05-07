@@ -1,16 +1,11 @@
 ﻿<?xml version="1.0"?>
 
-<robot name="door_robot" >
+<robot name="handle" >
 
     <link name="world" />
 
 
     <link name="door_handle">
-        <inertial>
-            <origin xyz="0 0 0" />
-            <mass value="2.6409912742551773" />
-            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
-        </inertial>
         <visual>
             <origin xyz="0 0 0" />
             <geometry>
@@ -20,15 +15,22 @@
             <color rgba ="1 1 1 1"/>
             </material>
         </visual>
-        <!--<collision>
+        <!--
+        <inertial>
+            <origin xyz="0 0 0" />
+            <mass value="2.6409912742551773" />
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+        </inertial>
+        <collision>
             <origin xyz="-0.148404 0.486267 4.17233e-07" />
             <geometry>
                 <mesh filename="handle_edited.obj" rpy="0 0 0" />
             </geometry>
-        </collision>-->
+        </collision>
+        -->
     </link>
 
-    <joint name="door_hinge" type="fixed">
+    <joint name="world_handle" type="fixed">
         <origin xyz="0 0 1" rpy="0 0 0" />
         <parent link="world" />
         <child link="door_handle" />
