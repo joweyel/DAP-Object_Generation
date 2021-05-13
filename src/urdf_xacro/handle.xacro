@@ -8,7 +8,7 @@
     <xacro:property name="handle_pos_z" value="0.0"/>
 
 
-    <xacro:macro name="door_handle" params="handle_file">
+    <xacro:macro name="door_handle" params="handle_file parent handle_pos_x handle_pos_y handle_pos_z">
         <link name="${parent}"/>
 
         <joint name="handle_door" type="fixed">
