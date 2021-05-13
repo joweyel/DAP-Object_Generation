@@ -3,12 +3,12 @@
 
     <xacro:arg name="plane_file" default=""/>
     <xacro:arg name="parent" default="world"/>
-    <xacro:arg name="size_x" default="0.0"/>
-    <xacro:arg name="size_y" default="0.0"/>
-    <xacro:arg name="size_z" default="0.0"/>
+    <xacro:property name="size_x" default="0.0"/>
+    <xacro:property name="size_y" default="0.0"/>
+    <xacro:property name="size_z" default="0.0"/>
 
 
-    <xacro:macro name="door_plane" params="plane_file parent size_x size_y size_z">
+    <xacro:macro name="door_plane" params="plane_file parent ">
         <link name="${parent}"/>
 
     
@@ -46,6 +46,6 @@
         </link>
     </xacro:macro>
 
-    <xacro:door_plane plane_file="$(arg plane_file)" parent="$(arg parent)" size_x="$(arg size_x)" size_y="$(arg size_y)" size_z="$(arg size_z)"/>
+    <xacro:door_plane plane_file="$(arg plane_file)" parent="$(arg parent)"/>
 
 </robot>
