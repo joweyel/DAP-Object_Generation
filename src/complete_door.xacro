@@ -3,12 +3,12 @@
 
     <xacro:property name="plane_xacro" value="plane.xacro"/>
     <xacro:property name="handle_xacro" value="handle.xacro"/>
-    <xacro:property name="handle_pos_x" value="0.0"/>
-    <xacro:property name="handle_pos_y" value="0.3"/>
-    <xacro:property name="handle_pos_z" value="0.0"/>
-    <xacro:property name="handle_ori_r" value="0.0"/>
-    <xacro:property name="handle_ori_p" value="0.0"/>
-    <xacro:property name="handle_ori_y" value="0.0"/>
+    <xacro:arg name="handle_pos_x" default="0.0"/>
+    <xacro:arg name="handle_pos_y" default="0.3"/>
+    <xacro:arg name="handle_pos_z" default="0.0"/>
+    <xacro:arg name="handle_ori_r" default="0.0"/>
+    <xacro:arg name="handle_ori_p" default="0.0"/>
+    <xacro:arg name="handle_ori_y" default="0.0"/>
     
     <xacro:include filename="plane.xacro"/>
     <xacro:door_plane parent="world"/>
