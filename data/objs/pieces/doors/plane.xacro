@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="door_plane" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:arg name="plane_file" default=""/>
+    <xacro:arg name="mesh_file" default=""/>
     <xacro:arg name="parent" default="world"/>
-    <xacro:arg name="size_x" default="0.0"/>
-    <xacro:arg name="size_y" default="0.0"/>
-    <xacro:arg name="size_z" default="0.0"/>
+    <xacro:property name="size_x" default="0.0"/>
+    <xacro:property name="size_y" default="0.0"/>
+    <xacro:property name="size_z" default="0.0"/>
 
 
-    <xacro:macro name="door_plane" params="plane_file parent size_x size_y size_z">
+    <xacro:macro name="door_plane" params="mesh_file parent">
         <link name="${parent}"/>
 
     
@@ -25,7 +25,7 @@
             <visual>
                 <origin xyz="0 0 0" />
                 <geometry>
-                    <mesh filename="${plane_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
+                    <mesh filename="${mesh_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
                 </geometry>
                 <material name="wood">
                 <color rgba ="1 1 1 1"/>
@@ -46,6 +46,6 @@
         </link>
     </xacro:macro>
 
-    <xacro:door_plane plane_file="$(arg plane_file)" parent="$(arg parent)" size_x="$(arg size_x)" size_y="$(arg size_y)" size_z="$(arg size_z)"/>
+    <xacro:door_plane plane_file="$(arg mesh_file)" parent="$(arg parent)"/>
 
 </robot>

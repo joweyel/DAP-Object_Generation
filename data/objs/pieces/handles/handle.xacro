@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="door_handle" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:arg name="handle_file" default=""/>
+    <xacro:arg name="mesh_file" default=""/>
     <xacro:arg name="parent" default="world"/>
     <xacro:property name="handle_pos_x" value="0.0"/>
     <xacro:property name="handle_pos_y" value="0.0"/>
     <xacro:property name="handle_pos_z" value="0.0"/>
+    <xacro:property name="handle_ori_r" value="0.0"/>
+    <xacro:property name="handle_ori_p" value="0.0"/>
+    <xacro:property name="handle_ori_y" value="0.0"/>
 
 
-    <xacro:macro name="door_handle" params="handle_file parent handle_pos_x handle_pos_y handle_pos_z">
+    <xacro:macro name="door_handle" params="mesh_file parent handle_pos_x handle_pos_y handle_pos_z handle_ori_r handle_ori_p handle_ori_y">
         <link name="${parent}"/>
 
         <joint name="handle_door" type="fixed">
             <!-- Hier xyz für door zu handle offset -->
-            <origin xyz="${handle_pos_x} ${handle_pos_y} ${handle_pos_z}" rpy="0 0 0" />
+            <origin xyz="${handle_pos_x} ${handle_pos_y} ${handle_pos_z}" rpy="${handle_ori_r} ${handle_ori_p} ${handle_ori_y}" />
             <parent link="${parent}" />
             <child link="door_handle" />
             <axis xyz="0 0 0" />        
@@ -26,7 +29,7 @@
                 <origin xyz="0 0 0" />
                 <geometry>
                     <!-- <mesh filename="handle_edited.obj" rpy="0 0 0" /> -->
-                    <mesh filename="${handle_file}" rpy="0 0 0" />
+                    <mesh filename="${mesh_file}" rpy="0 0 0" />
                 </geometry>
                 <material name="wood">
                 <color rgba ="1 1 1 1"/>
