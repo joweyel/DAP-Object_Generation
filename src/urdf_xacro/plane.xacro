@@ -24,7 +24,7 @@
             <visual>
                 <origin xyz="0 0 0" />
                 <geometry>
-                    <mesh filename="${plane_file}" rpy="0 0 0" />
+                    <mesh filename="${plane_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
                 </geometry>
                 <material name="wood">
                 <color rgba ="1 1 1 1"/>
@@ -45,6 +45,6 @@
         </link>
     </xacro:macro>
 
-    <xacro:door_plane plane_file="$(arg plane_file)"/>
+    <xacro:door_plane plane_file="$(arg plane_file)" size_x="$(size_x)" size_y="$(size_y)" size_z="$(size_z)"/>
 
 </robot>
