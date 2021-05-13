@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="complete door" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:arg name="plane_file" default=""/>
-    <xacro:arg name="handle_file" default=""/>
-    <xacro:arg name="handle_pos_x" value="0.0"/>
-    <xacro:arg name="handle_pos_y" value="0.0"/>
-    <xacro:arg name="handle_pos_z" value="1.0"/>
-    <xacro:arg name="handle_ori_r" value="0.0"/>
-    <xacro:arg name="handle_ori_p" value="0.0"/>
-    <xacro:arg name="handle_ori_y" value="0.0"/>
+    <xacro:property name="plane_file" default=""/>
+    <xacro:property name="handle_file" default=""/>
+    <xacro:property name="handle_pos_x" value="0.0"/>
+    <xacro:property name="handle_pos_y" value="0.0"/>
+    <xacro:property name="handle_pos_z" value="1.0"/>
+    <xacro:property name="handle_ori_r" value="0.0"/>
+    <xacro:property name="handle_ori_p" value="0.0"/>
+    <xacro:property name="handle_ori_y" value="0.0"/>
     <xacro:property name="size_x" default="0.0"/>
     <xacro:property name="size_y" default="0.0"/>
     <xacro:property name="size_z" default="0.0"/>
