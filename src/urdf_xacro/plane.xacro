@@ -2,19 +2,20 @@
 <robot name="door_plane" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:arg name="plane_file" default=""/>
+    <xacro:arg name="parent" default="world"/>
     <xacro:arg name="size_x" default="0.0"/>
     <xacro:arg name="size_y" default="0.0"/>
     <xacro:arg name="size_z" default="0.0"/>
 
 
-    <xacro:macro name="door_plane" params="plane_file size_x size_y size_z">
-        <link name="world"/>
+    <xacro:macro name="door_plane" params="plane_file parent size_x size_y size_z">
+        <link name="${parent}"/>
 
     
         <joint name="door_world" type="fixed">
             <origin xyz="0 0 1" rpy="0 0 0" />
-            <parent link="world" />
-            <child link="door_plane" />
+            <parent link="${parent}" />
+            <child link="plane" />
             <axis xyz="0 0 0" />
             <dynamics friction="0.4960139088111456" />
             <limit lower="0.0" upper="1.57"/>
@@ -44,5 +45,7 @@
             </collision>-->
         </link>
     </xacro:macro>
+
+    <xacro:door_plane plane_file="$(arg plane_file)" parent="$(arg parent)" size_x="$(arg size_x)" size_y="$(arg size_y)" size_z="$(arg size_z)"/>
 
 </robot>
