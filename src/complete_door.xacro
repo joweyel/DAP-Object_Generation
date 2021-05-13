@@ -16,7 +16,10 @@
     
 
     <xacro:include filename="handle.xacro"/>
-    <xacro:door_handle handle_pos_x="${handle_pos_x}" handle_pos_y="${handle_pos_y}" 
-    handle_pos_z="${handle_pos_z}" handle_ori_r="${handle_ori_r}" handle_ori_p="${handle_ori_p}" handle_ori_y="${handle_ori_y}"/>
+    <xacro:door_handle handle_pos_x="$(handle_pos_x)" handle_pos_y="$(handle_pos_y)" 
+    handle_pos_z="$(handle_pos_z)" handle_ori_r="$(handle_ori_r)" handle_ori_p="$(handle_ori_p)" handle_ori_y="$(handle_ori_y)"/>
+    
+ 
+   
 
 </robot>
