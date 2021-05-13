@@ -6,14 +6,17 @@
     <xacro:property name="handle_pos_x" value="0.0"/>
     <xacro:property name="handle_pos_y" value="0.0"/>
     <xacro:property name="handle_pos_z" value="0.0"/>
+    <xacro:property name="handle_ori_r" value="0.0"/>
+    <xacro:property name="handle_ori_p" value="0.0"/>
+    <xacro:property name="handle_ori_y" value="0.0"/>
 
 
-    <xacro:macro name="door_handle" params="handle_file parent handle_pos_x handle_pos_y handle_pos_z">
+    <xacro:macro name="door_handle" params="handle_file parent handle_pos_x handle_pos_y handle_pos_z handle_ori_r handle_ori_p handle_ori_y">
         <link name="${parent}"/>
 
         <joint name="handle_door" type="fixed">
             <!-- Hier xyz für door zu handle offset -->
-            <origin xyz="${handle_pos_x} ${handle_pos_y} ${handle_pos_z}" rpy="0 0 0" />
+            <origin xyz="${handle_pos_x} ${handle_pos_y} ${handle_pos_z}" rpy="${handle_ori_r} ${handle_ori_p} ${handle_ori_y}" />
             <parent link="${parent}" />
             <child link="door_handle" />
             <axis xyz="0 0 0" />        
