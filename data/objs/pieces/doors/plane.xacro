@@ -1,31 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="door_plane" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-    <xacro:arg name="mesh_file" default="door2.obj"/>
+ 
     <xacro:arg name="parent" default="world"/>
-    <xacro:property name="size_x" default="0.0"/>
-    <xacro:property name="size_y" default="0.0"/>
-    <xacro:property name="size_z" default="0.0"/>
+    <xacro:property name="door_mesh_file" value="door2.obj"/>
+    <xacro:property name="size_x" value="1.0"/>
+    <xacro:property name="size_y" value="1.0"/>
+    <xacro:property name="size_z" value="1.0"/>
 
 
-    <xacro:macro name="door_plane" params="mesh_file parent">
+    <xacro:macro name="door_plane" params="parent">
         <link name="${parent}"/>
 
     
         <joint name="door_world" type="fixed">
             <origin xyz="0 0 1" rpy="0 0 0" />
             <parent link="${parent}" />
-            <child link="plane" />
+            <child link="door_plane" />
             <axis xyz="0 0 0" />
             <dynamics friction="0.4960139088111456" />
             <limit lower="0.0" upper="1.57"/>
         </joint>
 
-        <link name="plane">
+        <link name="door_plane">
             <visual>
                 <origin xyz="0 0 0" />
                 <geometry>
-                    <mesh filename="${mesh_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
+                    <mesh filename="${door_mesh_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
                 </geometry>
                 <material name="wood">
                 <color rgba ="1 1 1 1"/>
@@ -46,6 +47,5 @@
         </link>
     </xacro:macro>
 
-    <xacro:door_plane mesh_file="$(arg mesh_file)" parent="$(arg parent)"/>
 
 </robot>

@@ -110,8 +110,8 @@ def main(urdf_input):
             projectionMatrix=projectionMatrix)
 
         print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
-        plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
-        plt.imsave(fname="dep_" + str(y) + ".png", arr=depthImg)
+        #plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
+        #plt.imsave(fname="dep_" + str(y) + ".png", arr=depthImg)
         pos_rot = p.getBasePositionAndOrientation(obj_urdf)
         print(pos_rot)
         ## BBox
