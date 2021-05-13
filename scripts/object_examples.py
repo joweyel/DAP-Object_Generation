@@ -6,6 +6,55 @@ import sys
 import pybullet as p
 import pybullet_data
 import time
+import numpy as np
+
+
+def drawAABB(aabb):
+    aabbMin = aabb[0]
+    aabbMax = aabb[1]
+    f = [aabbMin[0], aabbMin[1], aabbMin[2]]
+    t = [aabbMax[0], aabbMin[1], aabbMin[2]]
+    p.addUserDebugLine(f, t, [1, 0, 0])
+    f = [aabbMin[0], aabbMin[1], aabbMin[2]]
+    t = [aabbMin[0], aabbMax[1], aabbMin[2]]
+    p.addUserDebugLine(f, t, [0, 1, 0])
+    f = [aabbMin[0], aabbMin[1], aabbMin[2]]
+    t = [aabbMin[0], aabbMin[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [0, 0, 1])
+
+    f = [aabbMin[0], aabbMin[1], aabbMax[2]]
+    t = [aabbMin[0], aabbMax[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+
+    f = [aabbMin[0], aabbMin[1], aabbMax[2]]
+    t = [aabbMax[0], aabbMin[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+
+    f = [aabbMax[0], aabbMin[1], aabbMin[2]]
+    t = [aabbMax[0], aabbMin[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+
+    f = [aabbMax[0], aabbMin[1], aabbMin[2]]
+    t = [aabbMax[0], aabbMax[1], aabbMin[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+
+    f = [aabbMax[0], aabbMax[1], aabbMin[2]]
+    t = [aabbMin[0], aabbMax[1], aabbMin[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+
+    f = [aabbMin[0], aabbMax[1], aabbMin[2]]
+    t = [aabbMin[0], aabbMax[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+
+    f = [aabbMax[0], aabbMax[1], aabbMax[2]]
+    t = [aabbMin[0], aabbMax[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [1.0, 0.5, 0.5])
+    f = [aabbMax[0], aabbMax[1], aabbMax[2]]
+    t = [aabbMax[0], aabbMin[1], aabbMax[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
+    f = [aabbMax[0], aabbMax[1], aabbMax[2]]
+    t = [aabbMax[0], aabbMax[1], aabbMin[2]]
+    p.addUserDebugLine(f, t, [1, 1, 1])
 
 def main(urdf_input):
     p.connect(p.GUI)
@@ -24,10 +73,52 @@ def main(urdf_input):
     # obj_door.load()
     # obj_door.set_position([0, 0, 0])
 
-    obj = ArticulatedObject(filename=urdf_input)
-    obj.load()
-    obj.set_position([0, 0, 0])
+    # obj = ArticulatedObject(filename=urdf_input)
+    # obj.load()
+    # obj.set_position([0, 0, 0])
 
+    pos = np.arange(0, 6)
+    z_pos = np.random.normal(1, 0)
+    obj_urdf = p.loadURDF(urdf_input)
+    ys = np.linspace(-2, 2, 20)
+    count = 0
+    while True:
+
+        # x = np.random.choice(pos)
+        # y = np.random.choice(pos)
+        # z = np.random.choice(pos)
+        y = ys[count % len(ys)]
+        count += 1
+        
+        viewMatrix = p.computeViewMatrix(
+            cameraEyePosition=[1.5,y,1],
+            cameraTargetPosition=[0, 0, 1],
+            cameraUpVector=[0, 0, 1])
+
+        projectionMatrix = p.computeProjectionMatrixFOV(
+            fov=45.0,
+            aspect=1.0,
+            nearVal=0.1,
+            farVal=20.1)
+
+        width, height, rgbImg, depthImg, segImg = p.getCameraImage(
+            width=400, 
+            height=400,
+            viewMatrix=viewMatrix,
+            projectionMatrix=projectionMatrix)
+
+        print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
+        info = p.getVisualShapeData(obj_urdf)
+        pos_rot = p.getBasePositionAndOrientation(obj_urdf)
+        print(pos_rot)
+        ## BBox
+        # obj_urdf = p.loadURDF(urdf_input)
+        aabb = p.getAABB(obj_urdf)
+        # aabbMin = aabb[0]
+        # aabbMax = aabb[1]
+        # print('aabbMin = ', aabbMin)
+        # print('aabbMax = ', aabbMax)
+        drawAABB(aabb)
 
 
     for _ in range(24000):  # at least 100 seconds
