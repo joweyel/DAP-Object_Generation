@@ -7,7 +7,7 @@
     <xacro:arg name="size_z" default="0.0"/>
 
 
-    <xacro:macro name="door_plane" params="plane_file">
+    <xacro:macro name="door_plane" params="plane_file" "size_x" "size_y" "size_z">
         <link name="world"/>
 
     
@@ -44,7 +44,5 @@
             </collision>-->
         </link>
     </xacro:macro>
-
-    <xacro:door_plane plane_file="$(arg plane_file)" size_x="$(size_x)" size_y="$(size_y)" size_z="$(size_z)"/>
 
 </robot>
