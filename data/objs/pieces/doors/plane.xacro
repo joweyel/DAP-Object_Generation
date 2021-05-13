@@ -8,7 +8,7 @@
     <xacro:property name="size_z" default="0.0"/>
 
 
-    <xacro:macro name="door_plane" params="plane_file parent ">
+    <xacro:macro name="door_plane" params="plane_file parent">
         <link name="${parent}"/>
 
     
