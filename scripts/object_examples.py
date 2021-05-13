@@ -7,6 +7,7 @@ import pybullet as p
 import pybullet_data
 import time
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def drawAABB(aabb):
@@ -81,14 +82,15 @@ def main(urdf_input):
     z_pos = np.random.normal(1, 0)
     obj_urdf = p.loadURDF(urdf_input)
     ys = np.linspace(-2, 2, 20)
-    count = 0
-    while True:
+    #count = 0
+    #while True:
+    for y in ys:
 
         # x = np.random.choice(pos)
         # y = np.random.choice(pos)
         # z = np.random.choice(pos)
-        y = ys[count % len(ys)]
-        count += 1
+        #y = ys[count % len(ys)]
+        #count += 1
         
         viewMatrix = p.computeViewMatrix(
             cameraEyePosition=[1.5,y,1],
@@ -108,6 +110,7 @@ def main(urdf_input):
             projectionMatrix=projectionMatrix)
 
         print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
+        plt.imsave(fname=str(y)+".png", arr=rgbImg)
         info = p.getVisualShapeData(obj_urdf)
         pos_rot = p.getBasePositionAndOrientation(obj_urdf)
         print(pos_rot)
