@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="complete door" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    
+    <xacro:include filename="../data/objs/pieces/doors/xacro/door4.xacro"/>
+    <xacro:door_plane parent="world"/>
+    
+
+    <xacro:include filename="../data/objs/pieces/handles/xacro/handle1.xacro"/>
+    <xacro:door_handle handle_pos_x="0" handle_pos_y="-0.3" 
+    handle_pos_z="0" handle_ori_r="3.141592653589793" handle_ori_p="0" handle_ori_y="0"/>
+
+</robot>
