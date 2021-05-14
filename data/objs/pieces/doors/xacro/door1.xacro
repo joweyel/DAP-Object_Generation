@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="door_plane" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+ 
+    <xacro:arg name="parent" default="world"/>
+    <!--<xacro:property name="door_mesh_file" value="door2.obj"/>-->
+    <!--<xacro:property name="size_x" value="1.0"/>-->
+    <!--<xacro:property name="size_y" value="1.0"/>-->
+    <!--<xacro:property name="size_z" value="1.0"/>-->
+
+
+    <xacro:macro name="door_plane" params="parent">
+        <link name="${parent}"/>
+
+    
+        <joint name="door_world" type="fixed">
+            <origin xyz="0 0 1" rpy="0 0 0" />
+            <parent link="${parent}" />
+            <child link="door_plane" />
+            <axis xyz="0 0 0" />
+            <dynamics friction="0.4960139088111456" />
+            <limit lower="0.0" upper="1.57"/>
+        </joint>
+
+        <link name="door_plane">
+            <visual>
+                <origin xyz="0 0 0" />
+                <geometry>
+                    <mesh filename="../data/objs/pieces/doors/mesh/door_1/door1.obj" rpy="0 0 0" scale="1.0 1.0 1.0" />
+                </geometry>
+                <material name="wood">
+                <color rgba ="1 1 1 1"/>
+                </material>
+            </visual>
+            <!--
+            <inertial>
+                <origin xyz="0 0 0" />
+                <mass value="2.6409912742551773" />
+                <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+            </inertial>
+            <collision>
+                <origin xyz="-0.148404 0.486267 4.17233e-07" />
+                <geometry>
+                    <mesh filename="door2.obj" rpy="0 0 0" />
+                </geometry>
+            </collision>-->
+        </link>
+    </xacro:macro>
+
+
+</robot>

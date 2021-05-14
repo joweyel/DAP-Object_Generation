@@ -1,0 +1,82 @@
+﻿
+<!--<?xml version="1.0"?>-->
+
+<robot name="door_robot" >
+
+    <link name="world" />
+
+    <!-- door-->
+    
+    <link name="door_plane">
+
+        <visual>
+            <origin xyz="0 0 0" />
+            <geometry>
+                <mesh filename="handle_1.obj" rpy="0 0 0" />
+            </geometry>
+        </visual>
+        <!--
+        <inertial>
+            <origin xyz="0 0 0" />
+            <mass value="2.6409912742551773" />
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+        </inertial>
+        <collision>
+            <origin xyz="-0.148404 0.486267 4.17233e-07" />
+            <geometry>
+                <mesh filename="door2.obj" rpy="0 0 0" />
+            </geometry>
+        </collision>
+        -->
+    </link>
+    
+    <!--
+    <link name="door_handle">
+        <visual>
+            <origin xyz="0 0 0" />
+            <geometry>
+                <mesh filename="obj/handle_edited.obj" rpy="0 0 0" />
+            </geometry>
+        </visual>
+    
+        <inertial>
+            <origin xyz="0 0 0" />
+            <mass value="2.6409912742551773" />
+            <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
+        </inertial>
+        <collision>
+            <origin xyz="-0.148404 0.486267 4.17233e-07" />
+            <geometry>
+                <mesh filename="handle_edited.obj" rpy="0 0 0" />
+            </geometry>
+        </collision>
+        
+    </link>
+    -->
+
+    <joint name="world_door" type="fixed">
+        <origin xyz="0 0 1" rpy="0 0 0" />
+        <parent link="world" />
+        <child link="door_plane" />
+        <axis xyz="0 0 0" />
+        <dynamics friction="0.4960139088111456" />
+        <limit lower="0.0" upper="1.57"/>
+    </joint>
+    
+    <!--
+    <joint name="door_handle" type="fixed">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <parent link="door_plane" />
+        <child link="door_handle" />
+        <axis xyz="0 0 0" />
+        <dynamics friction="0.4960139088111456" />
+        <limit lower="0.0" upper="1.57"/>
+    </joint>
+    -->
+        
+    
+
+    
+        
+
+</robot>
