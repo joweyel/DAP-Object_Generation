@@ -93,6 +93,7 @@ def main(input_args):
             print(mesh)
             if obj_type == 'door':
                 print('door')
+                # size could be given as an input parameter
                 generate_xacro(xacro_path, obj_type, door_mesh_file=mesh,
                                size_x='1.0', size_y='1.0', size_z='1.0')
             if obj_type == 'handle':

@@ -80,7 +80,7 @@ def main(urdf_input):
 
     pos = np.arange(0, 6)
     z_pos = np.random.normal(1, 0)
-    obj_urdf = p.loadURDF(urdf_input)
+    obj = p.loadURDF(urdf_input)
     ys = np.linspace(-2, 2, 20)
     #count = 0
     #while True:
@@ -112,17 +112,8 @@ def main(urdf_input):
         print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
         #plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
         #plt.imsave(fname="dep_" + str(y) + ".png", arr=depthImg)
-        pos_rot = p.getBasePositionAndOrientation(obj_urdf)
+        pos_rot = p.getBasePositionAndOrientation(obj)
         print(pos_rot)
-        ## BBox
-        # obj_urdf = p.loadURDF(urdf_input)
-        aabb = p.getAABB(obj_urdf)
-        # aabbMin = aabb[0]
-        # aabbMax = aabb[1]
-        # print('aabbMin = ', aabbMin)
-        # print('aabbMax = ', aabbMax)
-        drawAABB(aabb)
-
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()

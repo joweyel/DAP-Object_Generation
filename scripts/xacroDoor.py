@@ -48,16 +48,16 @@ def generate_door_xacro(n_door, n_handle, **kwargs):
 
     for in_line in in_file:
         # meshes 
-        in_line = in_line.replace("${plane_xacro}",  str(kwargs['plane_xacro']))
-        in_line = in_line.replace("${handle_xacro}", str(kwargs['handle_xacro']))
-        in_line = in_line.replace("${handle_pos_x}", str(kwargs['handle_pos_x']))
-        in_line = in_line.replace("${handle_pos_y}", str(kwargs['handle_pos_y']))
-        in_line = in_line.replace("${handle_pos_z}", str(kwargs['handle_pos_z']))
-        in_line = in_line.replace("${handle_ori_r}", str(kwargs['handle_ori_r']))
-        in_line = in_line.replace("${handle_ori_p}", str(kwargs['handle_ori_p']))
-        in_line = in_line.replace("${handle_ori_y}", str(kwargs['handle_ori_y']))
-        print(in_line, end='')
-        out_file.write(in_line)
+        out_line = in_line.replace("${plane_xacro}",  str(kwargs['plane_xacro']))
+        out_line = out_line.replace("${handle_xacro}", str(kwargs['handle_xacro']))
+        out_line = out_line.replace("${handle_pos_x}", str(kwargs['handle_pos_x']))
+        out_line = out_line.replace("${handle_pos_y}", str(kwargs['handle_pos_y']))
+        out_line = out_line.replace("${handle_pos_z}", str(kwargs['handle_pos_z']))
+        out_line = out_line.replace("${handle_ori_r}", str(kwargs['handle_ori_r']))
+        out_line = out_line.replace("${handle_ori_p}", str(kwargs['handle_ori_p']))
+        out_line = out_line.replace("${handle_ori_y}", str(kwargs['handle_ori_y']))
+        # print(out_line, end='')
+        out_file.write(out_line)
 
     '''
     plane_xacro=dx, handle_xacro=hx,
@@ -78,7 +78,7 @@ def generate_door_xacro(n_door, n_handle, **kwargs):
 
 def get_handle_config():
     pos_y = np.random.choice([-0.3, 0.3])
-    r = 0 if pos_y > 0 else np.pi # orientation
+    r = np.pi if pos_y > 0 else 0 # orientation
     return [0, pos_y, 0], [r, 0, 0]
 
 def main(input_args):
@@ -98,21 +98,31 @@ def main(input_args):
     # print(handle_xacros)
     # print(handle_numbers)
 
-    for n_door in door_numbers:
-        for n_handle in handle_numbers: # handle_numbers:
-            dx = doors_path + 'door' + str(n_door) + '.xacro'
-            hx = handles_path + 'handle' + str(n_handle) + '.xacro'
+    if n_door in door_numbers and n_handle in handle_numbers:
+        dx = doors_path + 'door' + str(n_door) + '.xacro'
+        hx = handles_path + 'handle' + str(n_handle) + '.xacro'
 
-            xyz, rpy = get_handle_config()
-            generate_door_xacro(n_door, n_handle, plane_xacro=dx, handle_xacro=hx,
-                handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2], 
-                handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2]) 
+        xyz, rpy = get_handle_config()
+        generate_door_xacro(n_door, n_handle, plane_xacro=dx, handle_xacro=hx,
+            handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2], 
+            handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2]) 
+            
+    
+    # for n_door in door_numbers:
+    #     for n_handle in handle_numbers: # handle_numbers:
+    #         dx = doors_path + 'door' + str(n_door) + '.xacro'
+    #         hx = handles_path + 'handle' + str(n_handle) + '.xacro'
+    # 
+    #         xyz, rpy = get_handle_config()
+    #         generate_door_xacro(n_door, n_handle, plane_xacro=dx, handle_xacro=hx,
+    #             handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2], 
+    #             handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2]) 
             
     return # for later
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate "whole door" xacro')
-    parser.add_argument('-door', type=int, nargs='+', help='Path to Door plane')
-    parser.add_argument('-handle', type=int, nargs='+', help='Path to Door handle')
+    parser.add_argument('-door', type=int, default=None, nargs='+', help='Path to Door plane')
+    parser.add_argument('-handle', type=int, default=None, nargs='+', help='Path to Door handle')
     input_args = parser.parse_args()
     main(input_args)
