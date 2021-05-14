@@ -10,12 +10,12 @@
     <xacro:property name="handle_ori_p" value="0.0"/>
     <xacro:property name="handle_ori_y" value="0.0"/>
     
-    <xacro:include filename="plane.xacro"/>
+    <xacro:include filename="${plane_xacro}"/>
     <xacro:door_plane parent="world"/>
   
     
 
-    <xacro:include filename="handle.xacro"/>
+    <xacro:include filename="${handle_xacro}"/>
     <xacro:door_handle handle_pos_x="${handle_pos_x}" handle_pos_y="${handle_pos_y}" 
     handle_pos_z="${handle_pos_z}" handle_ori_r="${handle_ori_r}" handle_ori_p="${handle_ori_p}" handle_ori_y="${handle_ori_y}"/>
 

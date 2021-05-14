@@ -13,7 +13,6 @@
     <xacro:macro name="door_handle" params="handle_pos_x handle_pos_y handle_pos_z handle_ori_r handle_ori_p handle_ori_y">
 
         <joint name="handle_door" type="fixed">
-            <!-- Hier xyz für door zu handle offset -->
             <origin xyz="${handle_pos_x} ${handle_pos_y} ${handle_pos_z}" rpy="${handle_ori_r} ${handle_ori_p} ${handle_ori_y}" />
             <parent link="door_plane" />
             <child link="door_handle" />
@@ -26,7 +25,6 @@
             <visual>
                 <origin xyz="0 0 0" />
                 <geometry>
-                    <!-- <mesh filename="handle_edited.obj" rpy="0 0 0" /> -->
                     <mesh filename="${handle_mesh_file}" rpy="0 0 0" />
                 </geometry>
                 <material name="wood">

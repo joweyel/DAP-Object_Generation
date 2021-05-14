@@ -32,18 +32,6 @@
                 <color rgba ="1 1 1 1"/>
                 </material>
             </visual>
-            <!--
-            <inertial>
-                <origin xyz="0 0 0" />
-                <mass value="2.6409912742551773" />
-                <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0" />
-            </inertial>
-            <collision>
-                <origin xyz="-0.148404 0.486267 4.17233e-07" />
-                <geometry>
-                    <mesh filename="door2.obj" rpy="0 0 0" />
-                </geometry>
-            </collision>-->
         </link>
     </xacro:macro>
 
