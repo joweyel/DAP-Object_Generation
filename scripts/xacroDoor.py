@@ -58,22 +58,23 @@ def generate_door_xacro(n_door, n_handle, **kwargs):
         out_line = out_line.replace("${handle_ori_y}", str(kwargs['handle_ori_y']))
         # print(out_line, end='')
         out_file.write(out_line)
+    out_file.close()
 
-    '''
-    plane_xacro=dx, handle_xacro=hx,
-    handle_pos_x=0.0, handle_pos_y=0.3, handle_pos_z=0.0, 
-    handle_ori_r=0.0, handle_ori_p=0.0, handle_ori_y=0.0) 
-    '''
+    ## temporatily copy xacro-file to be processed to scripts directory ##
+    os.system("cp " + xacro_output + ' .')
+    xacro_file = xacro_output.split('/')[-1]
+    urdf_file = xacro_file.replace('.xacro', '.urdf')
 
-    # args = [xacro_path]
-    # for key, value in kwargs.items():
-    #     args.append(key + ":=" + str(value))
-    # opts, input_file_name = xacro.process_args(args)
-    # print(opts)
-    # doc = xacro.process_file(input_file_name, **vars(opts))
-    # return
-    # xacro_output = out_path + 'xacro/' + 'door_{}_{}'.format(n_door, n_handle) + '.xacro'
-    # TODO: 
+    ## Process Xacro-File ##
+    args = [xacro_file]
+    opts, input_file_name = xacro.process_args(args)
+    doc = xacro.process_file(input_file_name, **vars(opts))
+
+    ## Generate urdf-file in the designated folder ##
+    urdf_out = out_path + 'urdf/' + urdf_file
+    save_xml(urdf_out, doc)
+    os.system('rm ' + os.getcwd() + '/' + xacro_file) # cleaning up
+
 
 
 def get_handle_config():
@@ -105,8 +106,9 @@ def main(input_args):
         xyz, rpy = get_handle_config()
         generate_door_xacro(n_door, n_handle, plane_xacro=dx, handle_xacro=hx,
             handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2], 
-            handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2]) 
-            
+            handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2])
+        
+        
     
     # for n_door in door_numbers:
     #     for n_handle in handle_numbers: # handle_numbers:

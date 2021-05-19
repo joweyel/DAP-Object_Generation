@@ -2,6 +2,7 @@ import os
 from sys import settrace
 import time
 import argparse
+import numpy as np
 
 # XML-Stuff
 import xacro
@@ -29,7 +30,8 @@ def generate_xacro(xacro_path, obj_type, **kwargs):
     # door: size_xyz, mesh
     # handle: mesh
 
-    xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '.xacro')
+    xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '_s_{}.xacro'.format(kwargs['size_x']))
+    print(xacro_output)
     out_path = "/".join(xacro_path.split("/")[:-1]) + '/xacro/' + xacro_output
 
     in_file = open(xacro_path, 'r')
@@ -45,7 +47,7 @@ def generate_xacro(xacro_path, obj_type, **kwargs):
         # print(in_line, end='')
         out_file.write(in_line)
 
-
+    print("Processed Xacro saved to: ", os.path.relpath(out_path))
     return
 
     # doc = minidom.parseString(xacro_path)
@@ -65,8 +67,8 @@ def generate_xacro(xacro_path, obj_type, **kwargs):
 
 
 def main(input_args):
+    
     obj_type = input_args.type[0]  # type of objects
-    n = input_args.n               # number of object (specific number or all)
 
     # check in input_args, which directory to choose
     if obj_type == "door":
@@ -78,40 +80,36 @@ def main(input_args):
         exit(-1)
 
     # load xacro file and generate new xacros
-    print('Found xacro file in: ', xacro_path)
+    print('Found xacro template for a {} in: {}'.format(obj_type, xacro_path))
 
     # path to the objects
     mesh_path = '/'.join(xacro_path.split('/')[:-1]) + '/mesh/'
     avail_obj = sorted([mesh_path + obj for obj in os.listdir(mesh_path) if os.path.isdir(mesh_path + obj)])
-    n_avail_obj = [int(number.split('_')[-1]) for number in avail_obj]
+    # n_avail_obj = [int(number.split('_')[-1]) for number in avail_obj]
 
-    # load one or all objects
-    if n == 'all':
-        for obj_path in avail_obj:
-            mesh = obj_path + '/' + obj_type + str(obj_path.split('_')[-1]) + '.obj'
-            mesh = os.path.relpath(mesh)
-            print(mesh)
+    # load all objects
+    for obj_path in avail_obj:
+        # get path to obj-files to use as mesh-parameter for the xacro
+        mesh = obj_path + '/' + obj_type + str(obj_path.split('_')[-1]) + '.obj'
+        mesh = os.path.relpath(mesh)
+
+        # for tex in textures: # TODO
+        # for scale in scales: # TODO
+        scales = [str(round(s, 2)) for s in np.linspace(1.0, 2.0, 11)] # strings for scaling of the door    
+        for s in scales:
             if obj_type == 'door':
-                print('door')
-                # size could be given as an input parameter
+                # generate_xacro(xacro_path, obj_type, door_mesh_file=mesh,
+                                # size_x='1.0', size_y='1.0', size_z='1.0')    # size could be given as an input parameter
                 generate_xacro(xacro_path, obj_type, door_mesh_file=mesh,
-                               size_x='1.0', size_y='1.0', size_z='1.0')
+                               size_x=s, size_y=s, size_z=s)    # size could be given as an input parameter
+
             if obj_type == 'handle':
-                print('handle')
                 generate_xacro(xacro_path, obj_type, handle_mesh_file=mesh)
-    elif int(n) in n_avail_obj:
-        print(int(n))
-        # TODO: implemetnation for single file
-        pass
-    else:
-        print('Invalid number specified. Aborting!')
-        exit(-1)
+
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Objs into Xacro files (with given parameters)')
     parser.add_argument('-type', type=str, nargs='+', help='Type of xacro file to use (door or handle)')
-    parser.add_argument('-n', default='all', type=str, help='Number of object to process')
-
     input_args = parser.parse_args()
     main(input_args)
