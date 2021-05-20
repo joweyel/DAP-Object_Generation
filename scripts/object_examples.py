@@ -81,6 +81,37 @@ def main(urdf_input):
     pos = np.arange(0, 6)
     z_pos = np.random.normal(1, 0)
     obj = p.loadURDF(urdf_input)
+
+    #Boudning box
+    door_depth = 0.04
+    door_width = 0.75
+    door_height = 2.0
+    door_center = np.array([0.0, 0.0, 1.0])
+    bb_min_w = np.subtract(door_center, 0.5*np.array([2*door_depth, door_width, door_height]))
+    bb_max_w = np.add(door_center, 0.5 * np.array([0*door_depth, door_width, door_height]))
+    print("BB MIN: ", bb_min_w, "BB MAX", bb_max_w)
+    drawAABB([bb_min_w, bb_max_w])
+    """R=np.array([3,2,3])
+    camera_origin=np.array([1,1,1])
+    print("shape:",np.shape(R[0]))
+    t=np.multiply(-R, camera_origin)
+    print("t:###################################")
+    print(t)
+    extr=np.array([[R[0],t[0]],
+                   [R[1],t[1]],
+                   [R[2],t[2]],
+                   [0,1]])
+    print("extr:", extr)
+    world_coordinate=np.array([1,2,3,4]).T
+    #bb_min_c=np.multiply(extr.T,world_coordinate.T)
+    b#b_min_c=np.vdot(extr, world_coordinate)
+
+    print("bb min camera!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1")
+    print(bb_min_c)"""
+
+
+
+
     ys = np.linspace(-2, 2, 20)
     #count = 0
     #while True:
@@ -96,18 +127,38 @@ def main(urdf_input):
             cameraEyePosition=[1.5,y,1],
             cameraTargetPosition=[0, 0, 1],
             cameraUpVector=[0, 0, 1])
+        print("viewmatrix:",np.asarray(viewMatrix).reshape(4,4).T)
 
         projectionMatrix = p.computeProjectionMatrixFOV(
             fov=45.0,
             aspect=1.0,
             nearVal=0.1,
             farVal=20.1)
+        print("projmatrix:",projectionMatrix)
 
         width, height, rgbImg, depthImg, segImg = p.getCameraImage(
             width=400, 
             height=400,
             viewMatrix=viewMatrix,
             projectionMatrix=projectionMatrix)
+        
+        #Convert bb to image coordinates:
+        K=np.asarray(projectionMatrix).reshape(4,4)[:3,:4]
+        Rt=np.asarray(viewMatrix).reshape(4,4).T#.T[:3,:4]
+        #x_I=np.multiply(np.multiply(K,Rt),np.array([1,1,1,1]))
+        x_I_hom = (K @ Rt) @ np.concatenate((bb_min_w,np.array([1])))
+        print("xi hom:",x_I_hom)
+        xi_2d=np.array([x_I_hom[0]/x_I_hom[2],x_I_hom[1]/x_I_hom[2]])
+        print("xi 2d non hom:", xi_2d)
+        print("K: ",K)
+
+        plt.imshow(rgbImg)
+        plt.scatter(1,1)
+        plt.show()
+
+
+
+
 
         print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
         #plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
