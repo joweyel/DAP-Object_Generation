@@ -3,3 +3,7 @@
 *.jpg
 *.jpeg
 *.png
+data/objs/pieces/handles/xacro/*.xacro
+data/objs/pieces/doors/xacro/*.xacro
+data/objs/generated_objs/generated_doors/xacro/*.xacro
+data/objs/generated_objs/generated_doors/urdf/*.urdf
