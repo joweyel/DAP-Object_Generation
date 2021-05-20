@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="door_handle" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!--
     <xacro:property name="handle_mesh_file" value="handle_edited.obj"/>
     <xacro:arg name="handle_pos_x" default="0.0"/>
     <xacro:arg name="handle_pos_y" default="0.0"/>
@@ -8,7 +9,7 @@
     <xacro:arg name="handle_ori_r" default="0.0"/>
     <xacro:arg name="handle_ori_p" default="0.0"/>
     <xacro:arg name="handle_ori_y" default="0.0"/>
-
+    -->
 
     <xacro:macro name="door_handle" params="handle_pos_x handle_pos_y handle_pos_z handle_ori_r handle_ori_p handle_ori_y">
 
