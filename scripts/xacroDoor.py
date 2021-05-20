@@ -28,7 +28,7 @@ def read_xml(file):
         raise FileExistsError("Failed to open output:", exc=e)
 
 
-def generate_door_xacro(n_door, n_handle, **kwargs):
+def generate_door_xacro(**kwargs):
     out_path = '../data/objs/generated_objs/generated_doors/'
     xacro_path = out_path + 'complete_door.xacro'
 
@@ -36,6 +36,7 @@ def generate_door_xacro(n_door, n_handle, **kwargs):
     door_identifier = '.'.join(door_path.split('/')[-1].split('.')[:-1]) # name of door without file_ending
 
     handle_path = kwargs['handle_xacro']
+    print(handle_path)
     handle_identifier = re.search('[0-9]+', handle_path.split('/')[-1]).group(0) # number of handle
 
     xacro_output = out_path + 'xacro/' + '{}_h{}'.format(door_identifier, handle_identifier) + '.xacro'
@@ -85,8 +86,8 @@ def main():
     doors_path = '../data/objs/pieces/doors/xacro/'
     handle_path = '../data/objs/pieces/handles/xacro/'
     # get numbers of available doors/handles
-    door_xacros = sorted([door.split('/')[-1] for door in os.listdir(doors_path)])
-    handle_xacros = sorted([handle.split('/')[-1] for handle in os.listdir(handle_path)])
+    door_xacros = sorted([door.split('/')[-1] for door in os.listdir(doors_path)if door.split('/')[-1].endswith('xacro')])
+    handle_xacros = sorted([handle.split('/')[-1] for handle in os.listdir(handle_path) if handle.split('/')[-1].endswith('xacro')])
 
     for d in door_xacros:
         for h in handle_xacros:
@@ -95,7 +96,7 @@ def main():
             print(dx)
             door_scale = float(re.search('[0-9]\.[0-9]', dx).group(0)) # extract the scale 
             xyz, rpy = get_handle_config(door_scale)
-            generate_door_xacro(1, 1, plane_xacro=dx, handle_xacro=hx,
+            generate_door_xacro(plane_xacro=dx, handle_xacro=hx,
                 handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2],
                 handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2])
 
