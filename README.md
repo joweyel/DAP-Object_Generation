@@ -25,6 +25,8 @@ For Fast changes to the **Xacro-File** and immediate execution use the following
 
 ## Generating Data (from the scripts folder)
 
+[Hessenbox-Link](https://hessenbox.tu-darmstadt.de/getlink/MjZkWmh1aHo3QXFwaG0xVmg4NzlN/GIT_data) to bigger files like Blender-files and textures (to avoid tracking all of these files). These files have to be placed in the corrsponding folders.
+
 ### 1. Apply all possible textures to all possible Blender-files with the Python-API of Blender
 [generate_textured_mesh.py](scripts/generate_textured_mesh.py) invokes a python script in the subdirectories of the doors and handles, where it calls the Blender-API for all possible combinations of Objects and Textures (currently only tested for the doors and not the handles)<br>
 `python3 generate_textured_mesh.py`<br>
