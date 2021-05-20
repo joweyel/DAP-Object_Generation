@@ -1,4 +1,5 @@
-.blend
-.jpg
-.jpeg
-.png
+# ignore blender files and textures
+*.blend
+*.jpg
+*.jpeg
+*.png
