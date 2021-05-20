@@ -84,6 +84,7 @@ def main(input_args):
     avail_obj = sorted(np.unique(avail_obj))
     avail_tex = sorted(np.unique(avail_tex))
 
+    scales = [str(round(s, 2)) for s in np.linspace(1.0, 2.0, 11)] # strings for scaling of the door
 
     for obj_nr in avail_obj: # for loop over the different available objects
         for tex_nr in avail_tex:  # for-loop over the different available objects
@@ -91,7 +92,6 @@ def main(input_args):
             obj_file = '{}_{}_{}.obj'.format(obj_type, obj_nr, tex_nr)
             mesh = mesh_path + obj_file
             mesh = os.path.relpath(mesh)
-            scales = [str(round(s, 2)) for s in np.linspace(1.0, 2.0, 11)] # strings for scaling of the door
 
             for s in scales:
 
