@@ -31,7 +31,11 @@ def generate_xacro(xacro_path, obj_type, **kwargs):
     # door: size_xyz, mesh
     # handle: mesh
 
-    xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '_s{}.xacro'.format(kwargs['size_x']))
+    if obj_type == 'door':
+        xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '_s{}.xacro'.format(kwargs['size_x']))
+    if obj_type == 'handle':
+        xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '.xacro')
+    print(xacro_output)
     out_path = "/".join(xacro_path.split("/")[:-1]) + '/xacro/' + xacro_output
 
     in_file = open(xacro_path, 'r')
@@ -92,15 +96,16 @@ def main(input_args):
             obj_file = '{}_{}_{}.obj'.format(obj_type, obj_nr, tex_nr)
             mesh = mesh_path + obj_file
             mesh = os.path.relpath(mesh)
-
-            for s in scales:
-
-                if obj_type == 'door':
+            
+            if obj_type == 'door':
+                for s in scales:
                     generate_xacro(xacro_path, obj_type, door_mesh_file=mesh,
                                    size_x=s, size_y=s, size_z=s)    # size could be given as an input parameter
-                if obj_type == 'handle':
+            if obj_type == 'handle':
                     generate_xacro(xacro_path, obj_type, handle_mesh_file=mesh)
-    print('Processing of {} {}-xacros -> Done!'.format(int(len(avail_obj) * len(avail_tex) * len(scales)), obj_type))
+
+    s = len(scales) if obj_type == 'door' else 1
+    print('Processing of {} {}-xacros -> Done!'.format(int(len(avail_obj) * len(avail_tex) * s), obj_type))
     print('#Doors: ', len(avail_obj))
     print('#Textures: ', len(avail_tex))
     print('#Scales: ', len(scales))

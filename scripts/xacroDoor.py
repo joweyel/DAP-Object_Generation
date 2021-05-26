@@ -36,10 +36,9 @@ def generate_door_xacro(**kwargs):
     door_identifier = '.'.join(door_path.split('/')[-1].split('.')[:-1]) # name of door without file_ending
 
     handle_path = kwargs['handle_xacro']
-    print(handle_path)
-    handle_identifier = re.search('[0-9]+', handle_path.split('/')[-1]).group(0) # number of handle
-
+    handle_identifier = re.search('[0-9]+_[0-9]+', handle_path.split('/')[-1]).group(0) # number of handle
     xacro_output = out_path + 'xacro/' + '{}_h{}'.format(door_identifier, handle_identifier) + '.xacro'
+    print(xacro_output)
 
     in_file = open(xacro_path, 'r')     # open the template xacro 
     out_file = open(xacro_output, 'w')  # write the xacro with parameters filled in
@@ -93,7 +92,6 @@ def main():
         for h in handle_xacros:
             dx = doors_path + d
             hx = handle_path + h            
-            print(dx)
             door_scale = float(re.search('[0-9]\.[0-9]', dx).group(0)) # extract the scale 
             xyz, rpy = get_handle_config(door_scale)
             generate_door_xacro(plane_xacro=dx, handle_xacro=hx,

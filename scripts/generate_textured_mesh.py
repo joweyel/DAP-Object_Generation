@@ -18,14 +18,15 @@ def main():
         bash_query = 'blender -b ' + 'blend/' + bf + ' --python ' + script
         print(bash_query)
         os.system(bash_query)
-
-    return
+        
+    print('\n###############################################################\n')
+    
     ## TODO: implementin the same thing for handles ##
     os.chdir(root) # back to the roots, namely the "scripts"-folder
-    handle_dir = '../data/objs/pieces/hadles/'
+    handle_dir = '../data/objs/pieces/handles'
     print('Current dir: ', os.getcwd())
     os.chdir(handle_dir)
-    script = 'generate_textured_obj.py'
+    script = 'generate_textured_handles.py'
     print('Handle dir: ', os.getcwd())
     blend_files = natsorted(os.listdir('./blend/'))
     print('blend_files: ', blend_files)

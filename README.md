@@ -33,7 +33,7 @@ For Fast changes to the **Xacro-File** and immediate execution use the following
 **Blender files have to be placed in**: `data/objs/pieces/{doors|handles}/blend/`<br>
 **Textures have to be placed in**: `data/objs/pieces/{doors/handles}/mesh/tex/`<br><br>
 [generate_textured_doors.py](data/objs/pieces/doors/generate_textured_doors.py) creates for each door **obj** & **mtl** of the signature `door_X_Y.{obj|mtl}` where `X=#door` and `Y=#texture`<br>(e.g. `door_2_9.obj` was created from `door_2.blend` and `tex_9.{png|jpg}`)<br><br>
-[generate_textured_handles.py](TODO) **TODO**
+[generate_textured_handles.py](data/objs/pieces/handles/generate_textured_handles.py) **TODO**
 
 
 ### 2. Generating the separate Xacros for doors and handles
