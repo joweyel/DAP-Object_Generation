@@ -10,6 +10,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def world_to_img(world_coord, projectionMatrix, viewMatrix, imwidth, imheight):
+    K = np.asarray(projectionMatrix).reshape(4, 4)[:3, :4]
+    Rt = np.asarray(viewMatrix).reshape(4, 4).T
+
+    x_im_coord_hom = (K @ Rt) @ np.concatenate((world_coord, np.array([1])))
+    x_im_coord_2d = np.array([x_im_coord_hom[0] / x_im_coord_hom[2], x_im_coord_hom[1] / x_im_coord_hom[2]])
+    coord_to_pixel_scale = 130
+    x_im_pixel = np.multiply(x_im_coord_2d, coord_to_pixel_scale)
+    x_im_pixel = np.multiply(x_im_pixel, np.array([1, -1]))
+    return np.add(x_im_pixel, np.array([imwidth / 2, imheight / 2]))
+
+
 def drawAABB(aabb):
     aabbMin = aabb[0]
     aabbMax = aabb[1]
@@ -141,19 +153,11 @@ def main(urdf_input):
             height=400,
             viewMatrix=viewMatrix,
             projectionMatrix=projectionMatrix)
-        
-        #Convert bb to image coordinates:
-        K=np.asarray(projectionMatrix).reshape(4,4)[:3,:4]
-        Rt=np.asarray(viewMatrix).reshape(4,4).T#.T[:3,:4]
-        #x_I=np.multiply(np.multiply(K,Rt),np.array([1,1,1,1]))
-        x_I_hom = (K @ Rt) @ np.concatenate((bb_min_w,np.array([1])))
-        print("xi hom:",x_I_hom)
-        xi_2d=np.array([x_I_hom[0]/x_I_hom[2],x_I_hom[1]/x_I_hom[2]])
-        print("xi 2d non hom:", xi_2d)
-        print("K: ",K)
+
+        imcoord=world_to_img(world_coord=np.array([0,0.3,1]),projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height)
 
         plt.imshow(rgbImg)
-        plt.scatter(1,1)
+        plt.scatter(imcoord[0],imcoord[1])
         plt.show()
 
 
@@ -171,6 +175,8 @@ def main(urdf_input):
         time.sleep(1./240.)
 
     p.disconnect()
+
+
 
 
 if __name__ == '__main__':
