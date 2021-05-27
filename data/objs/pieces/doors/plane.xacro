@@ -28,10 +28,13 @@
                 <geometry>
                     <mesh filename="${door_mesh_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
                 </geometry>
-                <material name="wood">
-                <color rgba ="1 1 1 1"/>
-                </material>
             </visual>
+            <collision>
+                <origin xyz="0 0 0" />
+                <geometry>
+                    <mesh filename="${door_mesh_file}" rpy="0 0 0" scale="${size_x} ${size_y} ${size_z}" />
+                </geometry>
+            </collision>
         </link>
     </xacro:macro>
 
