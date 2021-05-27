@@ -11,15 +11,29 @@ import matplotlib.pyplot as plt
 
 
 def world_to_img(world_coord, projectionMatrix, viewMatrix, imwidth, imheight):
-    K = np.asarray(projectionMatrix).reshape(4, 4)[:3, :4]
+    K = np.asarray(projectionMatrix).reshape(4, 4)#[:3, :4]
     Rt = np.asarray(viewMatrix).reshape(4, 4).T
+    scale=400
 
     x_im_coord_hom = (K @ Rt) @ np.concatenate((world_coord, np.array([1])))
     x_im_coord_2d = np.array([x_im_coord_hom[0] / x_im_coord_hom[2], x_im_coord_hom[1] / x_im_coord_hom[2]])
-    coord_to_pixel_scale = 130
-    x_im_pixel = np.multiply(x_im_coord_2d, coord_to_pixel_scale)
-    x_im_pixel = np.multiply(x_im_pixel, np.array([1, -1]))
-    return np.add(x_im_pixel, np.array([imwidth / 2, imheight / 2]))
+    #coord_to_pixel_scale = 130
+    print("x im 2d", x_im_coord_2d)
+    print("normalized?",((x_im_coord_2d+1.0)/2.0))
+    #x_im_pixel = np.multiply(x_im_coord_2d, coord_to_pixel_scale)
+    #x_im_pixel = np.multiply(x_im_pixel, np.array([1, -1]))
+    #return np.add(x_im_pixel, np.array([imwidth / 2, imheight / 2]))
+    #return ((x_im_coord_2d+1.0)/2.0)@np.array([imwidth,imheight])
+    #return np.multiply(np.multiply(np.add(x_im_coord_2d, 1),0.5),np.array([imheight,imwidth]))
+    #norm_pix=((x_im_coord_2d+1.0)/2.0)*np.array([imwidth,imheight])
+    #print("norm_pix:",norm_pix)
+    scaled=np.array([x_im_coord_2d[0]*imwidth, x_im_coord_2d[1]*imheight])
+    transformed=np.array([scaled[0]+scale/2, scale-scaled[1]])
+    print("scaled:",scaled)
+    print(transformed)
+    return transformed
+
+    #return norm_pix#np.array([(imwidth/2)-norm_pix[0],(imheight/2)-norm_pix[1]])#np.array([200+norm_pix[0],200-norm_pix[1]])#np.array([(imwidth/2+norm_pix[0]/2),(imheight/2)-norm_pix[1]/2])#-np.array([imwidth/2,imheight/2])
 
 
 def drawAABB(aabb):
@@ -77,32 +91,21 @@ def main(urdf_input):
     floor = os.path.join(pybullet_data.getDataPath(), "mjcf/ground_plane.xml")
     p.loadMJCF(floor)
 
-    # urdf_path = 'urdf_xacro/'
-    # urdf_file = urdf_path + urdf_input
-    # door = os.path.join(gibson2.assets_path, 'models/cabinet/door.urdf')
-    # door = 'door.urdf'
-    # handle = 'door_handle.urdf'
-    # obj_door = ArticulatedObject(filename=door)
-    # obj_door.load()
-    # obj_door.set_position([0, 0, 0])
-
-    # obj = ArticulatedObject(filename=urdf_input)
-    # obj.load()
-    # obj.set_position([0, 0, 0])
-
-    pos = np.arange(0, 6)
-    z_pos = np.random.normal(1, 0)
     obj = p.loadURDF(urdf_input)
 
-    #Boudning box
-    door_depth = 0.04
-    door_width = 0.75
-    door_height = 2.0
-    door_center = np.array([0.0, 0.0, 1.0])
-    bb_min_w = np.subtract(door_center, 0.5*np.array([2*door_depth, door_width, door_height]))
-    bb_max_w = np.add(door_center, 0.5 * np.array([0*door_depth, door_width, door_height]))
-    print("BB MIN: ", bb_min_w, "BB MAX", bb_max_w)
-    drawAABB([bb_min_w, bb_max_w])
+    #Plane Bounding Box
+    plane_bb=p.getAABB(obj, linkIndex=0)
+    #drawAABB(plane_bb)
+
+    #Handle Bounding Box
+    handle_bb = p.getAABB(obj, linkIndex=1)
+    #drawAABB(plane_bb)
+
+    #Complete Door Bounding Box
+    all_bb_points=[plane_bb[0], plane_bb[1], handle_bb[0], handle_bb[1]]
+    complete_bb=[np.min(all_bb_points,axis=0),np.max(all_bb_points,axis=0)]
+    drawAABB(complete_bb)
+
     """R=np.array([3,2,3])
     camera_origin=np.array([1,1,1])
     print("shape:",np.shape(R[0]))
@@ -134,9 +137,9 @@ def main(urdf_input):
         # z = np.random.choice(pos)
         #y = ys[count % len(ys)]
         #count += 1
-        
+
         viewMatrix = p.computeViewMatrix(
-            cameraEyePosition=[1.5,y,1],
+            cameraEyePosition=[2.5,y,1],
             cameraTargetPosition=[0, 0, 1],
             cameraUpVector=[0, 0, 1])
         print("viewmatrix:",np.asarray(viewMatrix).reshape(4,4).T)
@@ -149,26 +152,25 @@ def main(urdf_input):
         print("projmatrix:",projectionMatrix)
 
         width, height, rgbImg, depthImg, segImg = p.getCameraImage(
-            width=400, 
+            width=400,
             height=400,
             viewMatrix=viewMatrix,
             projectionMatrix=projectionMatrix)
 
-        imcoord=world_to_img(world_coord=np.array([0,0.3,1]),projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height)
+        imcoord=world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height)
+        print("imcoord: ",imcoord)
 
-        plt.imshow(rgbImg)
-        plt.scatter(imcoord[0],imcoord[1])
-        plt.show()
-
-
-
-
+        #plt.imshow(rgbImg)
+        #plt.scatter(imcoord[0],imcoord[1])
+        #plt.pause(1.0)
+        #plt.clf()
 
         print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
         #plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
         #plt.imsave(fname="dep_" + str(y) + ".png", arr=depthImg)
         pos_rot = p.getBasePositionAndOrientation(obj)
         print(pos_rot)
+    #plt.show()
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()
@@ -184,5 +186,6 @@ if __name__ == '__main__':
         print("No urdf specified. Aborting!")
         exit(-1)
     urdf_input = sys.argv[1]
-        
+
     main(urdf_input)
+
