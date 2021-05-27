@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<features>
+	<object max="450 300" min="100 100"/>
+	<handle max="450 300" min="100 100"/>
+	<axis p_high="0 -0.35 2" p_low="0 -0.35 0"/>
+</features>

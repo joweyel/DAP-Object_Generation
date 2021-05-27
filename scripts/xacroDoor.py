@@ -11,6 +11,24 @@ import xacro
 from xml.dom import minidom
 import subprocess
 
+
+# (X, Y, Z) = (Depth, Width, Height)
+# door = (4, 75, 200), cabinet = (2, 45, 170), cupboard = (1.5, 50, 60)
+standard_scaling = {'door': [1.0, 1.0, 1.0], 'cabinet': [0.5, 0.6, 0.85], 'cupboard': [3.0/8.0, 2.0/3.0, 0.3]}
+
+def get_scale(hx):
+    doc = read_xml(hx)
+    meshs = doc.getElementsByTagName('mesh') # get mesh data from joint
+    mesh = meshs[0]
+    if mesh.hasAttribute('scale'):
+        scales_str = mesh.attributes['scale'].value
+        sx, sy, sz = scales_str.split(' ') # ensures the ordering is correct
+        sx = float(sx)
+        sy = float(sy)
+        sz = float(sz)
+    return [sx, sy, sz]
+    
+
 def save_xml(file, doc):
     try:
         out = open(file, 'w')
@@ -76,7 +94,7 @@ def generate_door_xacro(**kwargs):
 
 
 
-def get_handle_config(scale=1.0):
+def get_handle_config(scale=1.0): # use y-scale from door-xacro
     pos_y = np.random.choice([-0.3, 0.3]) * scale
     r = np.pi if pos_y > 0 else 0 # orientation
     return [0, pos_y, 0], [r, 0, 0]
@@ -87,12 +105,27 @@ def main():
     # get numbers of available doors/handles
     door_xacros = sorted([door.split('/')[-1] for door in os.listdir(doors_path)if door.split('/')[-1].endswith('xacro')])
     handle_xacros = sorted([handle.split('/')[-1] for handle in os.listdir(handle_path) if handle.split('/')[-1].endswith('xacro')])
+    print(handle_xacros)
+    for d in door_xacros:
+        for h in handle_xacros:
+            dx = doors_path + d
+            hx = handle_path + h
+            # get the y-scale to correctly scale the position of handles
+            scale = get_scale(dx)
+            xyz, rpy = get_handle_config(scale[1])
+            generate_door_xacro(plane_xacro=dx, handle_xacro=hx,
+                handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2],
+                handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2])
+
+
+    return
 
     for d in door_xacros:
         for h in handle_xacros:
             dx = doors_path + d
             hx = handle_path + h            
             door_scale = float(re.search('[0-9]\.[0-9]', dx).group(0)) # extract the scale 
+            # get y-scale from xacro
             xyz, rpy = get_handle_config(door_scale)
             generate_door_xacro(plane_xacro=dx, handle_xacro=hx,
                 handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2],
