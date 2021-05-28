@@ -33,7 +33,7 @@ For Fast changes to the **Xacro-File** and immediate execution use the following
 **Blender files have to be placed in**: `data/objs/pieces/{doors|handles}/blend/`<br>
 **Textures have to be placed in**: `data/objs/pieces/{doors/handles}/mesh/tex/`<br><br>
 [generate_textured_doors.py](data/objs/pieces/doors/generate_textured_doors.py) creates for each door **obj** & **mtl** of the signature `door_X_Y.{obj|mtl}` where `X=#door` and `Y=#texture`<br>(e.g. `door_2_9.obj` was created from `door_2.blend` and `tex_9.{png|jpg}`)<br><br>
-[generate_textured_handles.py](data/objs/pieces/handles/generate_textured_handles.py) **TODO**
+[generate_textured_handles.py](data/objs/pieces/handles/generate_textured_handles.py) **TODO**<br><br>
 
 
 ### 2. Generating the separate Xacros for doors and handles
@@ -41,9 +41,16 @@ In [xacroProcessor.py](scripts/xacroProcessor.py) the following values get assig
 - **Doors**: mesh gets assigned, scales for (x, y, z) of the door get assigned
 - **Handles**: mesh gets assigned
 
-**Output-Format(door)**: `door_X_Y_sZ.xacro` with `X=#door`, `Y=#texture` and `Z=scale in [1.0, 2.0]`<br>
-**Output-Folder**: `data/objs/pieces/{doors|handles}/xacro/`
+**Output-Format(door)**: `door_X_Y_{do|ca|cu}sZ.xacro` with `X=#door`, `Y=#texture`, `{do,ca,cu}` stand for `door, cabinet, cupboard` and `Z=scale in [1.0, 2.0]`<br>
+- `door, cabinet, cupboard` have a specific scale sepcified that gets applied instead of the scales in `[1.0, 2.0]`. This can possibly be changed later do allow more variability, also for othe door types (**TODO**)<br>
 
+**Input-Parameters:**
+- `-type` {door|handle}
+- `-cls`  {None|cabinet|cupboard}
+
+**Example:** `python3 xacroProcessor.py -type door -cls cabinet` generates doors with a scale typical for cabinets
+
+**Output-Folder**: `data/objs/pieces/{doors|handles}/xacro/`<br><br>
 
 ### 3. Generating the Xacros for the whole door (door and handle)
 [xacroDoor.py](scripts/xacroDoor.py) generates the Xacros, which "merge" the sole xacros of the door and handle together and saves them in `data/objs/generated_objs/generated_doors/xacro/`<br>
@@ -53,16 +60,16 @@ The following parameters get assigned to the generated Xacro:<br>
 - **handle_pos_{x|y|z}**: position of the handle (on the door)
 - **handle_ori_{r|p|y}**: orientation of the handle (on the door)
 
-**Output-Format**: `door_X_Y_sZ_hH.xacro` with `X=#door`, `Y=#texture`, `Z=scale in [1.0, 2.0]`, `H=#handle`<br>
+**Output-Format**: `door_X_Y_{do|ca|cu}sZ_hH.xacro` with `X=#door`, `Y=#texture`, `Z=scale in [1.0, 2.0]`, `H=#handle`<br>
 **Output-Folder**: `data/objs/generated_objs/generated_doors/xacro/`
 
 This script also converts the generated Xacro's to URDF's and places them in the designated folder `data/objs/generated_objs/generated_doors/urdf/`
 
-**Output-Format**: `door_X_Y_sZ_hH.urdf`<br>
-**Output-Folder**: `data/objs/generated_objs/generated_doors/urdf/`
+**Output-Format**: `door_X_Y_{do|ca|cu}sZ_hH.urdf`<br>
+**Output-Folder**: `data/objs/generated_objs/generated_doors/urdf/`<br><br><br>
 
 
-
+--------------------------------------
 
 
 

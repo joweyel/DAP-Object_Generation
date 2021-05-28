@@ -36,20 +36,21 @@ def generate_xacro(xacro_path, obj_type, cls, **kwargs):
     # door: size_xyz, mesh
     # handle: mesh
 
-    if obj_type == 'door':
-        # prefix to scale to determine which scale was used
+    if obj_type == 'door': # output_name for the door-object
+        # prefix to scale to determine which object-typical scale was used
         scale_prefix = cls[:2] if cls == 'cabinet' or cls == 'cupboard' else obj_type[:2]
         xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '_' + scale_prefix + 's{}.xacro'.format(kwargs['size_x']))
 
-    if obj_type == 'handle':
+    if obj_type == 'handle': # output_name for the handle-object
         xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '.xacro')
 
-    print(xacro_output)
-    out_path = "/".join(xacro_path.split("/")[:-1]) + '/xacro/' + xacro_output
+    print(xacro_output) 
+    out_path = "/".join(xacro_path.split("/")[:-1]) + '/xacro/' + xacro_output # file-path of output
 
     in_file = open(xacro_path, 'r')
     out_file = open(out_path, 'w')
 
+    # fill in the parameters of the specified xacro
     for in_line in in_file:
         if obj_type == 'door':
             in_line = in_line.replace("${z_origin}", kwargs['size_z'])
@@ -111,7 +112,9 @@ def main(input_args):
                 if cls == 'cabinet' or cls == 'cupboard': # both cases can be handled here just by 
                     scaling_factor = standard_scaling[cls]
                     generate_xacro(xacro_path, obj_type, cls, door_mesh_file=mesh,
-                                   size_x=scaling_factor[0], size_y=scaling_factor[1], size_z=scaling_factor[2])
+                                   size_x=str(scaling_factor[0]), 
+                                   size_y=str(scaling_factor[1]), 
+                                   size_z=str(scaling_factor[2]))
                 else: # "normal" door
                     for s in scales:
                         generate_xacro(xacro_path, obj_type, cls, door_mesh_file=mesh,
@@ -125,7 +128,7 @@ def main(input_args):
     print('#Doors: ', len(avail_obj))
     print('#Textures: ', len(avail_tex))
     print('#Scales: ', len(scales))
-    return 
+    return
 
     # load all objects
     for obj_path in avail_obj:

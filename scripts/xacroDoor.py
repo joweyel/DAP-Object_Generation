@@ -27,7 +27,19 @@ def get_scale(hx):
         sy = float(sy)
         sz = float(sz)
     return [sx, sy, sz]
-    
+
+def rescale_handle(doc, plane_xacro):
+    scale = get_scale(plane_xacro)
+    sx, sy, sz = scale
+    # alter the final xacro (rescale the handle size by the sz-factor)
+    links = doc.getElementsByTagName('link')[-1] # last link is the handle
+    mesh_nodes = links.getElementsByTagName('mesh')
+
+    for node in mesh_nodes:
+        scale = ' '.join([str(float(x) * sy) for x in node.getAttribute('scale').split(' ')])
+        node.attributes['scale'].value = scale
+ 
+    return doc
 
 def save_xml(file, doc):
     try:
@@ -52,9 +64,10 @@ def generate_door_xacro(**kwargs):
 
     door_path = kwargs['plane_xacro']
     door_identifier = '.'.join(door_path.split('/')[-1].split('.')[:-1]) # name of door without file_ending
-
+    print(door_identifier)
     handle_path = kwargs['handle_xacro']
     handle_identifier = re.search('[0-9]+_[0-9]+', handle_path.split('/')[-1]).group(0) # number of handle
+
     xacro_output = out_path + 'xacro/' + '{}_h{}'.format(door_identifier, handle_identifier) + '.xacro'
     print(xacro_output)
 
@@ -86,6 +99,13 @@ def generate_door_xacro(**kwargs):
     args = [xacro_file]
     opts, input_file_name = xacro.process_args(args)
     doc = xacro.process_file(input_file_name, **vars(opts))
+    print(doc)
+
+    # check if cas (cabinet) or cus (supboard is specified)
+    door_type = len(re.findall('c[a|u]s', door_identifier))
+    if door_type > 0:
+        plane_xacro = str(kwargs['plane_xacro'])
+        doc = rescale_handle(doc, plane_xacro)
 
     ## Generate urdf-file in the designated folder ##
     urdf_out = out_path + 'urdf/' + urdf_file
