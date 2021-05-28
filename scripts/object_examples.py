@@ -94,7 +94,7 @@ def main(urdf_input):
     obj = p.loadURDF(urdf_input)
 
     #Plane Bounding Box
-    plane_bb=p.getAABB(obj, linkIndex=0)
+    plane_bb = p.getAABB(obj, linkIndex=0)
     #drawAABB(plane_bb)
 
     #Handle Bounding Box
@@ -102,9 +102,22 @@ def main(urdf_input):
     #drawAABB(plane_bb)
 
     #Complete Door Bounding Box
-    all_bb_points=[plane_bb[0], plane_bb[1], handle_bb[0], handle_bb[1]]
-    complete_bb=[np.min(all_bb_points,axis=0),np.max(all_bb_points,axis=0)]
-    drawAABB(complete_bb)
+    all_bb_points = [plane_bb[0], plane_bb[1], handle_bb[0], handle_bb[1]]
+    complete_bb = [np.min(all_bb_points,axis=0),np.max(all_bb_points,axis=0)]
+    #drawAABB(complete_bb)
+
+    #Get rotation axis
+    handle_center_y = (handle_bb[0][1]+handle_bb[1][1])/2
+    plane_center_y = (plane_bb[0][1]+plane_bb[1][1])/2
+    if handle_center_y>plane_center_y:
+        axis=[[(plane_bb[0][0]+plane_bb[1][0])/2,plane_bb[0][1],plane_bb[0][2]],
+              [(plane_bb[0][0]+plane_bb[1][0])/2, plane_bb[0][1], plane_bb[1][2]]]
+    else:
+        axis=[[(plane_bb[0][0]+plane_bb[1][0])/2, plane_bb[1][1], plane_bb[0][2]],
+              [(plane_bb[0][0]+plane_bb[1][0])/2, plane_bb[1][1], plane_bb[1][2]]]
+    drawAABB(axis)
+
+
 
     """R=np.array([3,2,3])
     camera_origin=np.array([1,1,1])
@@ -188,4 +201,3 @@ if __name__ == '__main__':
     urdf_input = sys.argv[1]
 
     main(urdf_input)
-
