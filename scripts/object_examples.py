@@ -11,6 +11,19 @@ import matplotlib.pyplot as plt
 import cv2
 from shapely.geometry import box, Polygon
 
+def check_coverage(bb, imwidth, imheight):
+    im_boundary=np.copy(bb)
+    im_boundary[0][0] = np.clip(im_boundary[0][0], 0, imwidth)
+    im_boundary[1][0] = np.clip(im_boundary[1][0], 0, imwidth)
+    im_boundary[0][1] = np.clip(im_boundary[0][1], 0, imheight)
+    im_boundary[1][1] = np.clip(im_boundary[1][1], 0, imheight)
+
+    iou=iou_coverage(bb, im_boundary)
+    print("Area covered by image:", iou)
+    if iou>0.5:
+        return True
+    else: return False
+
 def iou_coverage(bb, image_bb):
     bb_edgepoints=bb_to_edgepoints(bb)
     im_edgepoints=bb_to_edgepoints(image_bb)
@@ -29,20 +42,10 @@ def bb_to_edgepoints(bb):
     bb_max_y = max(bb[0][1], bb[1][1])
     return [[bb_min_x, bb_min_y], [bb_min_x, bb_max_y], [bb_max_x, bb_max_y], [bb_max_x, bb_min_y]]
 
-
-
-
-
 def world_to_img(world_coord, projectionMatrix, viewMatrix, imwidth, imheight):
-    fx=0.9
-    fy=0.9
-    own_K=np.array([[fx, 0, 0, 0],
-                   [0, fy, 0, 0],
-                   [0, 0, 1, 0]])
     K = np.asarray(projectionMatrix).reshape(4, 4).T#[:3, :4]
     K = np.delete(K, 2, 0)
     K[2][2]=1
-    #K=own_K
     Rt = np.asarray(viewMatrix).reshape(4, 4).T
     print("instrinsic K:\n", K)
     print("extrinsic Rt:\n", Rt)
@@ -154,7 +157,7 @@ def main(urdf_input):
     eye_ys = np.linspace(2, 2, 1)
     eye_zs = np.linspace(2.5, 2.5, 1)
 
-    tar_ys = np.linspace(0.0, 1.0, 1)
+    tar_ys = np.linspace(0.0, 0.0, 1)
     tar_zs = np.linspace(0.5, 0.5, 1)
 
     for eye_x in eye_xs:
@@ -178,15 +181,17 @@ def main(urdf_input):
                             height=400,
                             viewMatrix=viewMatrix,
                             projectionMatrix=projectionMatrix)
-                        print("IOU:",iou_coverage(bb=[[-width,-height],[width, height]], image_bb=[[0,0],[width,height]]))
-
-                        imcoord=world_to_img(world_coord=[0,0.3,1],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height)
+                        plane_bb_im=[world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height),
+                                     world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+                        print("IOU:",iou_coverage(bb=[[50,50],[100, 100]], image_bb=[[0,0],[width,height]]))
+                        check_coverage(plane_bb_im, width, height)
+                        imcoord=world_to_img(world_coord=plane_bb[1],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height)
                         print("imcoord:",imcoord)
-                        #cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-                        #cv2.resizeWindow('image', width, height)
+                        cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+                        cv2.resizeWindow('image', width, height)
                         marked_rgbImg=cv2.circle(rgbImg, (int(imcoord[0]),int(imcoord[1])), radius=1, color=(0,0,255), thickness=10)
-                        #cv2.imshow('image', marked_rgbImg)
-                        #cv2.waitKey(0)
+                        cv2.imshow('image', marked_rgbImg)
+                        cv2.waitKey(0)
                         #cv2.destroyAllWindows()
                         #plt.imshow(rgbImg)
                         #plt.scatter(imcoord[0],imcoord[1])
