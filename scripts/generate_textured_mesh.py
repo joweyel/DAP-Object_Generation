@@ -28,11 +28,12 @@ def main():
     os.chdir(handle_dir)
     script = 'generate_textured_handles.py'
     print('Handle dir: ', os.getcwd())
-    blend_files = natsorted(os.listdir('./blend/'))
+    blend_files = natsorted([b for b in os.listdir('./blend/') if b.endswith('blend')])
     print('blend_files: ', blend_files)
 
     for bf in blend_files:
         print('Processing: ', bf)
+
         bash_query = 'blender -b ' + './blend/' + bf + ' --python ' + script
         os.system(bash_query)
 
