@@ -6,6 +6,7 @@ import sys
 import pybullet as p
 import pybullet_data
 import time
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -139,6 +140,63 @@ def drawAABB(aabb):
     t = [aabbMax[0], aabbMax[1], aabbMin[2]]
     p.addUserDebugLine(f, t, [1, 1, 1])
 
+def find_files(filename, search_path):
+   result = []
+    # Wlaking top-down from the root
+   for root, dir, files in os.walk(search_path):
+      if filename in files:
+         result.append(os.path.join(root, filename))
+   return result
+
+def get_json_data(file_path=None):
+    if file_path:
+        json_path = os.path.abspath(file_path)
+    else:
+        json_path = os.path.abspath(find_files('door_features_template.json', '../')[0])
+    with open(json_path,) as file:
+        data = json.load(file)
+    return data
+
+
+
+def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, **kwargs):
+    '''
+        Function: saves images and its corresponding features (in a json-file) 
+        Input:
+            bb_door:   min/max-Points of 2D door bounding-box
+            bb_handle: min/max-Points of 2D handle bounding-box
+    '''
+    
+    output_path = '../data/train_data/'
+
+    print(kwargs)
+
+    data = get_json_data(json_path)
+    data['object']['min'] = bb_door[0]
+    data['object']['max'] = bb_door[1]
+    data['handle']['min'] = bb_handle[0]
+    data['handle']['max'] = bb_handle[1]
+    data['axis'] = rotation
+
+    file_name = os.path.basename(file_name)
+    
+    # save images
+    if 'rgb_img' in kwargs.keys():
+        rgb_out = os.path.join(output_path, 'images/') + 'rgb_' + file_name.replace('.urdf', '.png') # or jpg
+        plt.imsave(rgb_out, kwargs['rgb_img'])
+
+    if 'depth_img' in kwargs.keys():
+        depth_out = os.path.join(output_path, 'images/') + 'depth_' + file_name.replace('.urdf', '.png')
+        plt.imsave(depth_out, kwargs['depth_img'])
+    if 'seg_img' in kwargs.keys():
+        seg_out = os.path.join(output_path, 'images/') + 'seg_' + file_name.replace('.urdf', '.png')
+        plt.imsave(seg_out, kwargs['seg_img'])
+
+    # save features in json
+    json_out = os.path.join(output_path, 'features/') + file_name.replace('.urdf', '.json')
+    with open(json_out, 'w') as f:
+        json.dump(data, f, indent=4)
+
 def main(urdf_input):
     p.connect(p.GUI)
     p.setGravity(0, 0, -9.8)
@@ -211,13 +269,22 @@ def main(urdf_input):
                                      world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,viewMatrix=viewMatrix, imwidth=width, imheight=height)]"""
 
                         imcoord=world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height, p=np.array([0,tar_y,tar_z]), c=np.array([eye_x, eye_y, eye_z]))
-                        print("imcoord:",imcoord)
+                        ## print("imcoord:",imcoord)
                         """if check_coverage(plane_bb_im, width, height):
                             print("Positive")
                             cv2.imwrite("../data/train_data/imgs/pos_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", rgbImg)
                         else:
                             print("Negative")
                             cv2.imwrite("../data/train_data/imgs/neg_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", rgbImg)"""
+
+                        generate_datapoint(urdf_input,
+                                           bb_door=[[0,0],[1,1]],
+                                           bb_handle=[[0.5,0.5],[1,1]], 
+                                           rotation=[[0.0,1.0]], json_path=None, 
+                                           rgb_img=rgbImg, depth_img=depthImg,
+                                           seg_img=segImg)
+                        continue
+
                         cv2.namedWindow('image', cv2.WINDOW_NORMAL)
                         cv2.resizeWindow('image', width, height)
                         marked_rgbImg=cv2.circle(rgbImg, (int(imcoord[0]),int(imcoord[1])), radius=1, color=(0,0,255), thickness=10)
