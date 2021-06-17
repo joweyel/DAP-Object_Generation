@@ -12,29 +12,32 @@ import matplotlib.pyplot as plt
 import cv2
 from shapely.geometry import box, Polygon
 
+
 def check_coverage(bb, imwidth, imheight, min_iou=0.9):
-    im_boundary=np.copy(bb)
+    im_boundary = np.copy(bb)
     im_boundary[0][0] = np.clip(im_boundary[0][0], 0, imwidth)
     im_boundary[1][0] = np.clip(im_boundary[1][0], 0, imwidth)
     im_boundary[0][1] = np.clip(im_boundary[0][1], 0, imheight)
     im_boundary[1][1] = np.clip(im_boundary[1][1], 0, imheight)
 
-    iou=iou_coverage(bb, im_boundary)
-    print("Area covered by image:", iou)
-    if iou>min_iou:
+    iou = iou_coverage(bb, im_boundary)
+    if iou > min_iou:
         return True
-    else: return False
+    else:
+        return False
+
 
 def iou_coverage(bb, image_bb):
-    bb_edgepoints=bb_to_edgepoints(bb)
-    im_edgepoints=bb_to_edgepoints(image_bb)
-    bb_shape=Polygon(bb_edgepoints)
-    im_shape=Polygon(im_edgepoints)
+    bb_edgepoints = bb_to_edgepoints(bb)
+    im_edgepoints = bb_to_edgepoints(image_bb)
+    bb_shape = Polygon(bb_edgepoints)
+    im_shape = Polygon(im_edgepoints)
 
-    intersection=bb_shape.intersection(im_shape).area
-    union=bb_shape.union(im_shape).area
-    iou=intersection/union
+    intersection = bb_shape.intersection(im_shape).area
+    union = bb_shape.union(im_shape).area
+    iou = intersection / union
     return iou
+
 
 def bb_to_edgepoints(bb):
     bb_min_x = min(bb[0][0], bb[1][0])
@@ -43,54 +46,27 @@ def bb_to_edgepoints(bb):
     bb_max_y = max(bb[0][1], bb[1][1])
     return [[bb_min_x, bb_min_y], [bb_min_x, bb_max_y], [bb_max_x, bb_max_y], [bb_max_x, bb_min_y]]
 
-def world_to_img(world_coord, projectionMatrix, viewMatrix, imwidth, imheight, p, c):
-    K = np.asarray(projectionMatrix).reshape(4, 4).T
-    K = np.delete(K, 2, 0)#According to https://stackoverflow.com/questions/60430958/understanding-the-view-and-projection-matrix-from-pybullet third row should be discarded
-    K[2][2]=1
-    print("Instrinsic K:\n", K)
 
-    print("Viewmatrix reshaped to (4,4):\n", np.asarray(viewMatrix).reshape(4,4))
-    Rt = np.asarray(viewMatrix).reshape(4, 4).T
-    print("Extrinsic Rt from Pybullet ViewMatrix:\n", Rt)
-
-    #Attempt to implement extrinsics from scratch following this: https://ksimek.github.io/2012/08/22/extrinsic/
-    u=np.array([0.0,0.0,1.0])
-    u/=np.linalg.norm(u)
-    L=p-c
-    L=L/np.linalg.norm(L)
-    s=np.cross(L,u)
-    s=s/np.linalg.norm(s)
-    us=np.cross(s,L)
-    R=np.array([[s[0], s[1], s[2]],
-               [us[0], us[1], us[2]],
-               [-L[0], -L[1], -L[2]]])
-    t=-R@c
-    Rt[0][0]=R[0][0]
-    Rt[0][1] = R[0][1]
-    Rt[0][2] = R[0][2]
-    Rt[1][0] = R[1][0]
-    Rt[1][1] = R[1][1]
-    Rt[1][2] = R[1][2]
-    Rt[2][0] = R[2][0]
-    Rt[2][1] = R[2][1]
-    Rt[2][2] = R[2][2]
-    Rt[0][3]=t[0]
-    Rt[1][3] = t[1]
-    Rt[2][3] = t[2]
-
-    print("Self built extrinsic Rt:\n", Rt)
-
-    cam_coordinates=Rt @ np.concatenate((world_coord, np.array([1])))
-    print("Homogeneous camera coordinates:\n", cam_coordinates)
-
-    x_im_coord_hom = (K @ Rt) @ np.concatenate((world_coord, np.array([1])))
-    print("Homogenous image coordinates",x_im_coord_hom)
+def world_to_img(world_coord, projectionMatrix, viewMatrix, imwidth, imheight):
+    K_x = np.asarray(projectionMatrix).reshape(4, 4).T  # [:3, :4]
+    K_x = np.delete(K_x, 2, 0)
+    K_x[2][2] = -1
+    Rt_x = np.asarray(viewMatrix).reshape(4, 4).T
+    x_im_coord_hom = (K_x @ Rt_x) @ np.concatenate((world_coord, np.array([1])))
     x_im_coord_2d = np.array([x_im_coord_hom[0] / x_im_coord_hom[2], x_im_coord_hom[1] / x_im_coord_hom[2]])
+    x_sc = (x_im_coord_2d + 1) / 2
+    x_scaled = x_sc * imwidth
 
-    sc=(x_im_coord_2d+1)/2
-    scaled=sc*imwidth
-    print("Final scaled image coordinates")
-    return scaled
+    K_y = np.asarray(projectionMatrix).reshape(4, 4).T  # [:3, :4]
+    K_y = np.delete(K_y, 2, 0)
+    K_y[2][2] = 1
+    Rt_y = np.asarray(viewMatrix).reshape(4, 4).T
+    y_im_coord_hom = (K_y @ Rt_y) @ np.concatenate((world_coord, np.array([1])))
+    y_im_coord_2d = np.array([y_im_coord_hom[0] / y_im_coord_hom[2], y_im_coord_hom[1] / y_im_coord_hom[2]])
+    y_sc = (y_im_coord_2d + 1) / 2
+    y_scaled = y_sc * imheight
+
+    return [x_scaled[0],y_scaled[1]]
 
 
 def drawAABB(aabb):
@@ -140,33 +116,34 @@ def drawAABB(aabb):
     t = [aabbMax[0], aabbMax[1], aabbMin[2]]
     p.addUserDebugLine(f, t, [1, 1, 1])
 
+
 def find_files(filename, search_path):
-   result = []
+    result = []
     # Wlaking top-down from the root
-   for root, dir, files in os.walk(search_path):
-      if filename in files:
-         result.append(os.path.join(root, filename))
-   return result
+    for root, dir, files in os.walk(search_path):
+        if filename in files:
+            result.append(os.path.join(root, filename))
+    return result
+
 
 def get_json_data(file_path=None):
     if file_path:
         json_path = os.path.abspath(file_path)
     else:
         json_path = os.path.abspath(find_files('door_features_template.json', '../')[0])
-    with open(json_path,) as file:
+    with open(json_path, ) as file:
         data = json.load(file)
     return data
 
 
-
 def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, **kwargs):
     '''
-        Function: saves images and its corresponding features (in a json-file) 
+        Function: saves images and its corresponding features (in a json-file)
         Input:
             bb_door:   min/max-Points of 2D door bounding-box
             bb_handle: min/max-Points of 2D handle bounding-box
     '''
-    
+
     output_path = '../data/train_data/'
 
     print(kwargs)
@@ -179,10 +156,10 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
     data['axis'] = rotation
 
     file_name = os.path.basename(file_name)
-    
+
     # save images
     if 'rgb_img' in kwargs.keys():
-        rgb_out = os.path.join(output_path, 'images/') + 'rgb_' + file_name.replace('.urdf', '.png') # or jpg
+        rgb_out = os.path.join(output_path, 'images/') + 'rgb_' + file_name.replace('.urdf', '.png')  # or jpg
         plt.imsave(rgb_out, kwargs['rgb_img'])
 
     if 'depth_img' in kwargs.keys():
@@ -197,52 +174,47 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
     with open(json_out, 'w') as f:
         json.dump(data, f, indent=4)
 
+
 def main(urdf_input):
     p.connect(p.GUI)
     p.setGravity(0, 0, -9.8)
-    p.setTimeStep(1./240.)
+    p.setTimeStep(1. / 240.)
 
     floor = os.path.join(pybullet_data.getDataPath(), "mjcf/ground_plane.xml")
     p.loadMJCF(floor)
 
     obj = p.loadURDF(urdf_input)
 
-    #Plane Bounding Box
+    # Plane Bounding Box
     plane_bb = p.getAABB(obj, linkIndex=0)
-    #drawAABB(plane_bb)
+    # drawAABB(plane_bb)
 
-    #Handle Bounding Box
+    # Handle Bounding Box
     handle_bb = p.getAABB(obj, linkIndex=1)
-    #drawAABB(handle_bb)
+    # drawAABB(handle_bb)
 
-    #Complete Door Bounding Box
+    # Complete Door Bounding Box
     all_bb_points = [plane_bb[0], plane_bb[1], handle_bb[0], handle_bb[1]]
-    complete_bb = [np.min(all_bb_points,axis=0),np.max(all_bb_points,axis=0)]
-    #drawAABB(complete_bb)
+    complete_bb = [np.min(all_bb_points, axis=0), np.max(all_bb_points, axis=0)]
+    # drawAABB(complete_bb)
 
-    #Get rotation axis
-    handle_center_y = (handle_bb[0][1]+handle_bb[1][1])/2
-    plane_center_y = (plane_bb[0][1]+plane_bb[1][1])/2
-    if handle_center_y>plane_center_y:
-        axis=[[(plane_bb[0][0]+plane_bb[1][0])/2,plane_bb[0][1],plane_bb[0][2]],
-              [(plane_bb[0][0]+plane_bb[1][0])/2, plane_bb[0][1], plane_bb[1][2]]]
+    # Get rotation axis
+    handle_center_y = (handle_bb[0][1] + handle_bb[1][1]) / 2
+    plane_center_y = (plane_bb[0][1] + plane_bb[1][1]) / 2
+    if handle_center_y > plane_center_y:
+        axis = [[(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[0][1], plane_bb[0][2]],
+                [(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[0][1], plane_bb[1][2]]]
     else:
-        axis=[[(plane_bb[0][0]+plane_bb[1][0])/2, plane_bb[1][1], plane_bb[0][2]],
-              [(plane_bb[0][0]+plane_bb[1][0])/2, plane_bb[1][1], plane_bb[1][2]]]
+        axis = [[(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[1][1], plane_bb[0][2]],
+                [(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[1][1], plane_bb[1][2]]]
     drawAABB(axis)
 
-    """eye_xs = np.linspace(-3, -1, 4)
+    eye_xs = np.linspace(3, 1, 4)
     eye_ys = np.linspace(-2, 2, 4)
-    eye_zs = np.linspace(0.5, 2.5, 4)
+    eye_zs = np.linspace(-0.5, 2.5, 4)
 
-    tar_ys = np.linspace(-1, 1, 4)
-    tar_zs = np.linspace(0, 2, 4)"""
-    eye_xs = np.linspace(3, 3, 1)
-    eye_ys = np.linspace(1.0, 1.0, 1)
-    eye_zs = np.linspace(3.5, 3.5, 1)
-
-    tar_ys = np.linspace(1.0, 1.0, 1)
-    tar_zs = np.linspace(0.5, 1.5, 1)
+    tar_ys = np.linspace(-1.5, 1.5, 4)
+    tar_zs = np.linspace(-0.5, 2, 4)
 
     for eye_x in eye_xs:
         for eye_y in eye_ys:
@@ -250,7 +222,7 @@ def main(urdf_input):
                 for tar_y in tar_ys:
                     for tar_z in tar_zs:
                         viewMatrix = p.computeViewMatrix(
-                            cameraEyePosition=[eye_x,tar_y,eye_z],
+                            cameraEyePosition=[eye_x, tar_y, eye_z],
                             cameraTargetPosition=[0, tar_y, tar_z],
                             cameraUpVector=[0, 0, 1])
 
@@ -265,50 +237,31 @@ def main(urdf_input):
                             height=400,
                             viewMatrix=viewMatrix,
                             projectionMatrix=projectionMatrix)
-                        """plane_bb_im=[world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height),
-                                     world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,viewMatrix=viewMatrix, imwidth=width, imheight=height)]"""
+                        plane_bb_im=[world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height),
+                                     world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,viewMatrix=viewMatrix, imwidth=width, imheight=height)]
 
-                        imcoord=world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height, p=np.array([0,tar_y,tar_z]), c=np.array([eye_x, eye_y, eye_z]))
-                        ## print("imcoord:",imcoord)
-                        """if check_coverage(plane_bb_im, width, height):
-                            print("Positive")
-                            cv2.imwrite("../data/train_data/imgs/pos_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", rgbImg)
+                        imcoord = world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
+                                               viewMatrix=viewMatrix, imwidth=width, imheight=height)
+                        marked_rgbImg = cv2.circle(rgbImg, (int(imcoord[0]), int(imcoord[1])), radius=1,
+                                                   color=(0, 0, 255), thickness=10)
+                        if check_coverage(plane_bb_im, width, height):
+                            cv2.imwrite("../data/train_data/imgs/pos_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", marked_rgbImg)
                         else:
-                            print("Negative")
-                            cv2.imwrite("../data/train_data/imgs/neg_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", rgbImg)"""
+                            cv2.imwrite("../data/train_data/imgs/neg_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", marked_rgbImg)
 
-                        generate_datapoint(urdf_input,
-                                           bb_door=[[0,0],[1,1]],
-                                           bb_handle=[[0.5,0.5],[1,1]], 
-                                           rotation=[[0.0,1.0]], json_path=None, 
+                        """generate_datapoint(urdf_input,
+                                           bb_door=[[0, 0], [1, 1]],
+                                           bb_handle=[[0.5, 0.5], [1, 1]],
+                                           rotation=[[0.0, 1.0]], json_path=None,
                                            rgb_img=rgbImg, depth_img=depthImg,
                                            seg_img=segImg)
-                        continue
-
-                        cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-                        cv2.resizeWindow('image', width, height)
-                        marked_rgbImg=cv2.circle(rgbImg, (int(imcoord[0]),int(imcoord[1])), radius=1, color=(0,0,255), thickness=10)
-                        cv2.imshow('image', marked_rgbImg)
-                        cv2.waitKey(0)
-                        #cv2.imwrite("m"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", marked_rgbImg)
-                        #cv2.destroyAllWindows()
-                        #plt.imshow(rgbImg)
-                        #plt.scatter(imcoord[0],imcoord[1])
-                        #plt.pause(1.0)
-                        #plt.clf()
-
-                        #plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
-                        #plt.imsave(fname="dep_" + str(y) + ".png", arr=depthImg)
-                        #pos_rot = p.getBasePositionAndOrientation(obj)
-    plt.show()
+                        continue"""
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()
-        time.sleep(1./240.)
+        time.sleep(1. / 240.)
 
     p.disconnect()
-
-
 
 
 if __name__ == '__main__':
