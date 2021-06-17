@@ -237,7 +237,7 @@ def main(urdf_input):
 
     tar_ys = np.linspace(-1, 1, 4)
     tar_zs = np.linspace(0, 2, 4)"""
-    eye_xs = np.linspace(-3, -3, 1)
+    eye_xs = np.linspace(3, 3, 1)
     eye_ys = np.linspace(1.0, 1.0, 1)
     eye_zs = np.linspace(3.5, 3.5, 1)
 
