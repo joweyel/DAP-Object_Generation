@@ -38,6 +38,15 @@ def iou_coverage(bb, image_bb):
     iou = intersection / union
     return iou
 
+def edge_coverage(bb, imwidth, imheight):
+    edges = bb_to_edgepoints(bb)
+    edge_coverage=len(edges)
+    for e in edges:
+        if e[0]>imwidth or e[0]<0:
+            edge_coverage-=1
+        elif e[1]>imheight or e[1]<0:
+            edge_coverage-=1
+    return edge_coverage
 
 def bb_to_edgepoints(bb):
     bb_min_x = min(bb[0][0], bb[1][0])
@@ -240,7 +249,7 @@ def main(urdf_input):
                         plane_bb_im=[world_to_img(world_coord=plane_bb[0],projectionMatrix=projectionMatrix, viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                      world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,viewMatrix=viewMatrix, imwidth=width, imheight=height)]
 
-                        imcoord = world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
+                        imcoord = world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
                                                viewMatrix=viewMatrix, imwidth=width, imheight=height)
                         marked_rgbImg = cv2.circle(rgbImg, (int(imcoord[0]), int(imcoord[1])), radius=1,
                                                    color=(0, 0, 255), thickness=10)
