@@ -13,7 +13,7 @@ import cv2
 from shapely.geometry import box, Polygon
 
 
-def check_coverage(bb, imwidth, imheight, min_iou=0.9):
+def check_coverage(bb, imwidth, imheight):
     im_boundary = np.copy(bb)
     im_boundary[0][0] = np.clip(im_boundary[0][0], 0, imwidth)
     im_boundary[1][0] = np.clip(im_boundary[1][0], 0, imwidth)
@@ -21,11 +21,13 @@ def check_coverage(bb, imwidth, imheight, min_iou=0.9):
     im_boundary[1][1] = np.clip(im_boundary[1][1], 0, imheight)
 
     iou = iou_coverage(bb, im_boundary)
-    if iou > min_iou:
-        return True
-    else:
-        return False
+    return iou
 
+def good_image(bb, imwidth, imheight, min_ec=0.5, ec_weight=1.0, iou_weight=1.0, min_score=0.5):
+    ec=edge_coverage(bb, imwidth, imheight)
+    iou=check_coverage(bb, imwidth,imheight)
+    score=(ec*ec_weight+iou*iou_weight)/(ec_weight+iou_weight) if ec>=min_ec else 0
+    return score>=min_score
 
 def iou_coverage(bb, image_bb):
     bb_edgepoints = bb_to_edgepoints(bb)
@@ -46,7 +48,7 @@ def edge_coverage(bb, imwidth, imheight):
             edge_coverage-=1
         elif e[1]>imheight or e[1]<0:
             edge_coverage-=1
-    return edge_coverage
+    return edge_coverage/len(edges)
 
 def bb_to_edgepoints(bb):
     bb_min_x = min(bb[0][0], bb[1][0])
@@ -253,7 +255,7 @@ def main(urdf_input):
                                                viewMatrix=viewMatrix, imwidth=width, imheight=height)
                         marked_rgbImg = cv2.circle(rgbImg, (int(imcoord[0]), int(imcoord[1])), radius=1,
                                                    color=(0, 0, 255), thickness=10)
-                        if check_coverage(plane_bb_im, width, height):
+                        if good_image(bb=plane_bb_im, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0, iou_weight=1.0, min_score=0.5):
                             cv2.imwrite("../data/train_data/imgs/pos_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", marked_rgbImg)
                         else:
                             cv2.imwrite("../data/train_data/imgs/neg_x"+str(eye_x)+"y"+str(eye_y)+"z"+str(eye_z)+"ty"+str(tar_y)+"tz"+str(tar_z)+".png", marked_rgbImg)
