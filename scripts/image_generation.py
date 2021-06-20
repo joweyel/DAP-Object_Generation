@@ -23,10 +23,18 @@ def check_coverage(bb, imwidth, imheight):
     iou = iou_coverage(bb, im_boundary)
     return iou
 
-def good_image(bb, imwidth, imheight, min_ec=0.5, ec_weight=1.0, iou_weight=1.0, min_score=0.5):
-    ec=edge_coverage(bb, imwidth, imheight)
-    iou=check_coverage(bb, imwidth,imheight)
-    score=(ec*ec_weight+iou*iou_weight)/(ec_weight+iou_weight) if ec>=min_ec else 0
+def rotation_axis_covered(axis_img, imwidth, imheight):
+    if axis_img[0][0]<imwidth and axis_img[0][0]>0 and axis_img[0][1]<imheight and axis_img[0][1]>0:
+        return True
+    if axis_img[1][0]<imwidth and axis_img[1][0]>0 and axis_img[1][1]<imheight and axis_img[1][1]>0:
+        return True
+    return False
+
+def good_image(bb_img, axis_img, imwidth, imheight, min_ec=0.5, ec_weight=1.0, iou_weight=1.0, min_score=0.5):
+    ec=edge_coverage(bb_img, imwidth, imheight)
+    iou=check_coverage(bb_img, imwidth,imheight)
+    axis_covered=rotation_axis_covered(axis_img=axis_img, imwidth=imwidth, imheight=imheight)
+    score=(ec*ec_weight+iou*iou_weight)/(ec_weight+iou_weight) if ec>=min_ec and axis_covered else 0
     return score>=min_score
 
 def iou_coverage(bb, image_bb):
@@ -196,7 +204,7 @@ def get_rotation_axis(plane_bb, handle_bb):
                 [(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[1][1], plane_bb[1][2]]]
     return axis
 
-def generate_data_imgs(plane_bb, urdf_input, eye_xs, eye_ys, eye_zs, tar_ys, tar_zs):
+def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, tar_ys, tar_zs):
     for eye_x in eye_xs:
         for eye_y in eye_ys:
             for eye_z in eye_zs:
@@ -228,7 +236,15 @@ def generate_data_imgs(plane_bb, urdf_input, eye_xs, eye_ys, eye_zs, tar_ys, tar
                                                viewMatrix=viewMatrix, imwidth=width, imheight=height)
                         marked_rgbImg = cv2.circle(rgbImg, (int(imcoord[0]), int(imcoord[1])), radius=1,
                                                    color=(0, 0, 255), thickness=10)
-                        if good_image(bb=plane_bb_im, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
+
+                        axis = get_rotation_axis(plane_bb, handle_bb)
+                        axis_img = [
+                            world_to_img(world_coord=axis[0], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
+                                         imwidth=width, imheight=height),
+                            world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
+                                         imwidth=width, imheight=height)]
+
+                        if good_image(bb_img=plane_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
                                       iou_weight=1.0, min_score=0.5):
                             cv2.imwrite("../data/train_data/imgs/pos_x" + str(eye_x) + "y" + str(eye_y) + "z" + str(
                                 eye_z) + "ty" + str(tar_y) + "tz" + str(tar_z) + ".png", marked_rgbImg)
@@ -267,12 +283,12 @@ def main(urdf_input):
     drawAABB(axis)
 
     eye_xs = np.linspace(3, 1, 3)
-    eye_ys = np.linspace(-2, 2, 5)
-    eye_zs = np.linspace(0.5, 2.5, 4)
+    eye_ys = np.linspace(-1.0, 1.0, 5)
+    eye_zs = np.linspace(0.5, 2.0, 4)
 
-    tar_ys = np.linspace(-1.5, 1.5, 4)
-    tar_zs = np.linspace(0.0, 2, 4)
-    generate_data_imgs(plane_bb=plane_bb, urdf_input=urdf_input,
+    tar_ys = np.linspace(-1.0, 1.0, 5)
+    tar_zs = np.linspace(0.0, 2, 5)
+    generate_data_imgs(plane_bb=plane_bb, handle_bb=handle_bb, urdf_input=urdf_input,
                        eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs)
 
     for _ in range(24000):  # at least 100 seconds
