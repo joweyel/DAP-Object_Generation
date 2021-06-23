@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 from shapely.geometry import box, Polygon
+import matplotlib as plt
 
 
 def check_coverage(bb, imwidth, imheight):
@@ -236,6 +237,8 @@ def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, 
                                                viewMatrix=viewMatrix, imwidth=width, imheight=height)
                         marked_rgbImg = cv2.circle(rgbImg, (int(imcoord[0]), int(imcoord[1])), radius=1,
                                                    color=(0, 0, 255), thickness=10)
+                        marked_rgbImg=cv2.cvtColor(marked_rgbImg, cv2.COLOR_BGR2RGB)
+
 
                         axis = get_rotation_axis(plane_bb, handle_bb)
                         axis_img = [
