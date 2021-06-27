@@ -166,8 +166,6 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
 
     output_path = '../data/train_data/'
 
-    print(kwargs)
-
     data = get_json_data(json_path)
     data['object']['min'] = bb_door[0]
     data['object']['max'] = bb_door[1]
@@ -179,18 +177,18 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
 
     # save images
     if 'rgb_img' in kwargs.keys():
-        rgb_out = os.path.join(output_path, 'images/') + 'rgb_' + file_name.replace('.urdf', '.png')  # or jpg
-        plt.imsave(rgb_out, kwargs['rgb_img'])
+        rgb_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_rgb.png')  # or jpg
+        cv2.imwrite(rgb_out, kwargs['rgb_img'])
 
     if 'depth_img' in kwargs.keys():
-        depth_out = os.path.join(output_path, 'images/') + 'depth_' + file_name.replace('.urdf', '.png')
-        plt.imsave(depth_out, kwargs['depth_img'])
+        depth_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_depth.png')
+        cv2.imwrite(depth_out, kwargs['depth_img'])
     if 'seg_img' in kwargs.keys():
-        seg_out = os.path.join(output_path, 'images/') + 'seg_' + file_name.replace('.urdf', '.png')
-        plt.imsave(seg_out, kwargs['seg_img'])
+        seg_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_seg.png')
+        cv2.imwrite(seg_out, kwargs['seg_img'])
 
     # save features in json
-    json_out = os.path.join(output_path, 'features/') + file_name.replace('.urdf', '.json')
+    json_out = os.path.join(output_path, 'features/') + file_name.replace('.FORMAT', '.json')
     with open(json_out, 'w') as f:
         json.dump(data, f, indent=4)
 
@@ -227,17 +225,19 @@ def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, 
                             height=400,
                             viewMatrix=viewMatrix,
                             projectionMatrix=projectionMatrix)
+                        rgbImg = cv2.cvtColor(rgbImg, cv2.COLOR_BGR2RGB)
 
                         plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
                                                     viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                        world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
                                                     viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+                        handle_bb_im = [world_to_img(world_coord=handle_bb[0], projectionMatrix=projectionMatrix,
+                                                    viewMatrix=viewMatrix, imwidth=width, imheight=height),
+                                       world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
+                                                    viewMatrix=viewMatrix, imwidth=width, imheight=height)]
 
-                        imcoord = world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
-                                               viewMatrix=viewMatrix, imwidth=width, imheight=height)
-                        marked_rgbImg = cv2.circle(rgbImg, (int(imcoord[0]), int(imcoord[1])), radius=1,
-                                                   color=(0, 0, 255), thickness=10)
-                        marked_rgbImg=cv2.cvtColor(marked_rgbImg, cv2.COLOR_BGR2RGB)
+                        sample_name=urdf_input.replace('.urdf','')+"_ex_" + str(eye_x) + "_ey_" + str(eye_y) + "_ez_" + str(
+                                eye_z) + "_ty_" + str(tar_y) + "_tz_" + str(tar_z)+".FORMAT"
 
 
                         axis = get_rotation_axis(plane_bb, handle_bb)
@@ -248,20 +248,13 @@ def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, 
                                          imwidth=width, imheight=height)]
 
                         if good_image(bb_img=plane_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
-                                      iou_weight=1.0, min_score=0.5):
-                            cv2.imwrite("../data/train_data/imgs/pos_x" + str(eye_x) + "y" + str(eye_y) + "z" + str(
-                                eye_z) + "ty" + str(tar_y) + "tz" + str(tar_z) + ".png", marked_rgbImg)
-                        else:
-                            cv2.imwrite("../data/train_data/imgs/neg_x" + str(eye_x) + "y" + str(eye_y) + "z" + str(
-                                eye_z) + "ty" + str(tar_y) + "tz" + str(tar_z) + ".png", marked_rgbImg)
-
-                        """generate_datapoint(urdf_input,
-                                           bb_door=[[0, 0], [1, 1]],
-                                           bb_handle=[[0.5, 0.5], [1, 1]],
-                                           rotation=[[0.0, 1.0]], json_path=None,
-                                           rgb_img=rgbImg, depth_img=depthImg,
-                                           seg_img=segImg)
-                        continue"""
+                                      iou_weight=1.0, min_score=0.7):
+                            generate_datapoint(sample_name,
+                                               bb_door=plane_bb_im,
+                                               bb_handle=handle_bb_im,
+                                               rotation=axis_img, json_path=None,
+                                               rgb_img=rgbImg, depth_img=depthImg,
+                                               seg_img=segImg)
 
 def main(urdf_input):
     p.connect(p.GUI)
