@@ -227,6 +227,8 @@ def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, 
                             projectionMatrix=projectionMatrix)
                         rgbImg = cv2.cvtColor(rgbImg, cv2.COLOR_BGR2RGB)
 
+                        depthImg=cv2.cvtColor(depthImg, cv2.COLOR_GRAY2RGB)
+
                         plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
                                                     viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                        world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
