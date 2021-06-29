@@ -86,7 +86,7 @@ def world_to_img(world_coord, projectionMatrix, viewMatrix, imwidth, imheight):
     y_sc = (y_im_coord_2d + 1) / 2
     y_scaled = y_sc * imheight
 
-    return [x_scaled[0],y_scaled[1]]
+    return [int(x_scaled[0]),int(y_scaled[1])]
 
 
 def drawAABB(aabb):
@@ -228,6 +228,7 @@ def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, 
                         rgbImg = cv2.cvtColor(rgbImg, cv2.COLOR_BGR2RGB)
 
                         depthImg=cv2.cvtColor(depthImg, cv2.COLOR_GRAY2RGB)
+
 
                         plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
                                                     viewMatrix=viewMatrix, imwidth=width, imheight=height),
