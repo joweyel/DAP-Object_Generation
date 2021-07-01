@@ -137,12 +137,12 @@ def generate_door_xacro(**kwargs):
     save_xml(urdf_out, doc)
     os.system('rm ' + os.getcwd() + '/' + xacro_file) # cleaning up
 
-
-
 def generate_doors(data, door_path, handle_path):
     print(door_path, '\n', handle_path)
     door_types = list(data['doors'].keys())
     print(door_types)
+
+    count = 0
 
     for door_type in door_types:
         print('Processing [{}]'.format(door_type))
@@ -186,6 +186,8 @@ def generate_doors(data, door_path, handle_path):
                                 generate_door_xacro(plane_xacro=dx, handle_xacro=hx,
                                     handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2],
                                     handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2])
+                                count += 1
+                                print('xacro[{}]'.format(count), end='\t')
 
 def main(input_args):
 
