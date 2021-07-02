@@ -11,7 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 from shapely.geometry import box, Polygon
-import matplotlib as plt
 
 
 def check_coverage(bb, imwidth, imheight):
@@ -178,14 +177,14 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
     # save images
     if 'rgb_img' in kwargs.keys():
         rgb_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_rgb.png')  # or jpg
-        cv2.imwrite(rgb_out, kwargs['rgb_img'])
+        plt.imsave(rgb_out,kwargs['rgb_img'], format='png')
 
     if 'depth_img' in kwargs.keys():
         depth_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_depth.png')
-        cv2.imwrite(depth_out, kwargs['depth_img'])
+        plt.imsave(depth_out,kwargs['depth_img'], format='png')
     if 'seg_img' in kwargs.keys():
         seg_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_seg.png')
-        cv2.imwrite(seg_out, kwargs['seg_img'])
+        plt.imsave(seg_out,kwargs['seg_img'], format='png')
 
     # save features in json
     json_out = os.path.join(output_path, 'features/') + file_name.replace('.FORMAT', '.json')
@@ -225,9 +224,6 @@ def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, 
                             height=400,
                             viewMatrix=viewMatrix,
                             projectionMatrix=projectionMatrix)
-                        rgbImg = cv2.cvtColor(rgbImg, cv2.COLOR_BGR2RGB)
-
-                        depthImg=cv2.cvtColor(depthImg, cv2.COLOR_GRAY2RGB)
 
 
                         plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
