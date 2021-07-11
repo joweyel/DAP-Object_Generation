@@ -82,7 +82,8 @@ def read_xml(file):
 def get_handle_config(scale=1.0): # use y-scale from door-xacro
     pos_y = np.random.choice([-0.3, 0.3]) * scale
     r = np.pi if pos_y > 0 else 0 # orientation
-    return [0, pos_y, 0], [r, 0, 0]
+    desc = 'right' if r > 0 else 'left'
+    return [0, pos_y, 0], [r, 0, 0], desc
 
 def process_xacro(xacro_in, xacro_out, kwargs):
     in_file =  open(xacro_in,  'r')    # open the template xacro 
@@ -110,7 +111,7 @@ def generate_door_xacro(**kwargs):
     door_identifier = '.'.join(door_path.split('/')[-1].split('.')[:-1]) # name of door without file_ending
     handle_path = kwargs['handle_xacro']
     handle_identifier = re.search('[0-9]+_[0-9]+', handle_path.split('/')[-1]).group(0) # number of handle
-    xacro_output = out_path + 'xacro/' + '{}_h_{}'.format(door_identifier, handle_identifier) + '.xacro'
+    xacro_output = out_path + 'xacro/' + '{}_h_{}'.format(door_identifier, handle_identifier) + '_' + kwargs['desc'] + '.xacro'
 
     process_xacro(xacro_path, xacro_output, kwargs)
     print('xacro_output: ', xacro_output)
@@ -182,10 +183,10 @@ def generate_doors(data, door_path, handle_path):
                             hx = os.path.join(handle_path, handle_filename)
                             for dx in door_files:
                                 scale = get_scale(dx)
-                                xyz, rpy = get_handle_config(scale[1])
+                                xyz, rpy, desc = get_handle_config(scale[1])
                                 generate_door_xacro(plane_xacro=dx, handle_xacro=hx,
                                     handle_pos_x=xyz[0], handle_pos_y=xyz[1], handle_pos_z=xyz[2],
-                                    handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2])
+                                    handle_ori_r=rpy[0], handle_ori_p=rpy[1], handle_ori_y=rpy[2], desc=desc)
                                 count += 1
                                 print('xacro[{}]'.format(count), end='\t')
 

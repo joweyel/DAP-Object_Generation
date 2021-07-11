@@ -1,4 +1,5 @@
 import os
+import json
 from sys import settrace
 import time
 import argparse
@@ -31,12 +32,37 @@ def read_xml(file):
     except IOError as e:
         raise FileExistsError("Failed to open output:", exc=e)
 
+def get_object_info(obj):
+    file = obj.split('/')[-1].split('.')[0] # get filename without ending
+    _, door_nr, tex_nr = file.split('_')    # extract the object info
+    return door_nr, tex_nr
+
+def get_json_info(data, obj_type, cls):
+    if obj_type == 'door':
+        if cls == None:
+            obj_nr = data['door']['objects']
+            tex_nr = data['door']['texture']
+        else:
+            obj_nr = data[cls]['objects']
+            tex_nr = data[cls]['texture']
+    elif obj_type == 'handle':
+        handle_types = list(data['door'].keys())
+        handle_types.remove('texture')
+        handle_types.remove('objects')
+
+        print(handle_types)
+    else:
+        print("get_json_info: invalid object-type [{}]".format(obj_type))
+        exit(-1)
+    return obj_nr, tex_nr
 
 def generate_xacro(xacro_path, obj_type, cls, **kwargs):
     # door: size_xyz, mesh
     # handle: mesh
+    print(kwargs)
+    return 
 
-    if obj_type == 'door': # output_name for the door-object
+    if obj_type == 'door': # output_name for the door(like)-objects
         # prefix to scale to determine which object-typical scale was used
         scale_prefix = cls[:2] if cls == 'cabinet' or cls == 'cupboard' else obj_type[:2]
         xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '_' + scale_prefix + 's{}.xacro'.format(kwargs['size_x']))
@@ -44,8 +70,8 @@ def generate_xacro(xacro_path, obj_type, cls, **kwargs):
     if obj_type == 'handle': # output_name for the handle-object
         xacro_output = kwargs[str(obj_type) + '_mesh_file'].split('/')[-1].replace('.obj', '.xacro')
 
-    print(xacro_output) 
-    out_path = "/".join(xacro_path.split("/")[:-1]) + '/xacro/' + xacro_output # file-path of output
+    # file-path of output for generated xacros
+    out_path = "/".join(xacro_path.split("/")[:-1]) + '/xacro/' + xacro_output 
 
     in_file = open(xacro_path, 'r')
     out_file = open(out_path, 'w')
@@ -64,6 +90,14 @@ def generate_xacro(xacro_path, obj_type, cls, **kwargs):
 
     # print("Processed Xacro saved to: ", os.path.relpath(out_path))
 
+def find_files(filename, search_path):
+   result = []
+
+    # Wlaking top-down from the root
+   for root, dir, files in os.walk(search_path):
+      if filename in files:
+         result.append(os.path.join(root, filename))
+   return result
 
 def main(input_args):
     
@@ -82,22 +116,37 @@ def main(input_args):
     # load xacro file and generate new xacros
     print('Found xacro template for a {} in: {}'.format(obj_type, xacro_path))
 
+    '''
+    # load informations from json
+    json_path = os.path.abspath(find_files('door.json', '../')[0])
+    print(json_path)
+    with open(json_path,) as file:
+        data = json.load(file)
+    obj_nr, tex_nr = get_json_info(data, obj_type, cls)
+    print(obj_nr, tex_nr)
+    '''
+
     # path to the objects
     mesh_path = '/'.join(xacro_path.split('/')[:-1]) + '/mesh/'
     avail_files = sorted([mesh_path + obj for obj in os.listdir(mesh_path) if (mesh_path + obj).endswith('obj')])
 
+
+    # exctract all the combinations of object, texture that are available (assumption: every object has all textures applied)
     avail_obj = []
     avail_tex = []
 
-    # exctract all the combinations of object, texture that are available (assumption: every object has all textures applied)
+
     for obj in avail_files: 
-        file = obj.split('/')[-1].split('.')[0] # get filename without ending
-        _, door_nr, tex_nr = file.split('_')
+        door_nr, tex_nr = get_object_info(obj)
         avail_obj.append(door_nr)
         avail_tex.append(tex_nr)
 
     avail_obj = sorted(np.unique(avail_obj))
     avail_tex = sorted(np.unique(avail_tex))
+    
+    print(avail_obj)
+    print(avail_tex)
+
 
     scales = [str(round(s, 2)) for s in np.linspace(0.5, 1.0, 11)] # strings for scaling of the door
 
@@ -129,6 +178,8 @@ def main(input_args):
     print('#Textures: ', len(avail_tex))
     print('#Scales: ', len(scales))
     return
+
+
 
     # load all objects
     for obj_path in avail_obj:

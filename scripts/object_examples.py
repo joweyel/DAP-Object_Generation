@@ -82,15 +82,15 @@ def main(urdf_input):
     z_pos = np.random.normal(1, 0)
     obj = p.loadURDF(urdf_input)
     ys = np.linspace(-2, 2, 20)
-    #count = 0
-    #while True:
-    for y in ys:
+    count = 0
+    while True:
+    # for y in ys:
 
-        # x = np.random.choice(pos)
-        # y = np.random.choice(pos)
-        # z = np.random.choice(pos)
-        #y = ys[count % len(ys)]
-        #count += 1
+        x = np.random.choice(pos)
+        y = np.random.choice(pos)
+        z = np.random.choice(pos)
+        y = ys[count % len(ys)]
+        count += 1
         
         viewMatrix = p.computeViewMatrix(
             cameraEyePosition=[1.5,y,1],
@@ -109,11 +109,11 @@ def main(urdf_input):
             viewMatrix=viewMatrix,
             projectionMatrix=projectionMatrix)
 
-        print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
+        # print('rgb = ', rgbImg.shape, ', d = ', depthImg.shape, segImg.shape)
         #plt.imsave(fname="rgb_"+str(y)+".png", arr=rgbImg)
         #plt.imsave(fname="dep_" + str(y) + ".png", arr=depthImg)
         pos_rot = p.getBasePositionAndOrientation(obj)
-        print(pos_rot)
+        # print(pos_rot)
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()

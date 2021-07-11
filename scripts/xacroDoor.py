@@ -1,5 +1,6 @@
 import os
 import re
+import json
 from sys import settrace
 import time
 import argparse
@@ -14,7 +15,28 @@ import subprocess
 
 # (X, Y, Z) = (Depth, Width, Height)
 # door = (4, 75, 200), cabinet = (2, 45, 170), cupboard = (1.5, 50, 60)
-standard_scaling = {'door': [1.0, 1.0, 1.0], 'cabinet': [0.5, 0.6, 0.85], 'cupboard': [3.0/8.0, 2.0/3.0, 0.3]}
+standard_scaling = {
+    'door':     np.array([1.0, 1.0, 1.0]), 
+    'cabinet':  np.array([0.5, 0.6, 0.85]), 
+    'cupboard': np.array([3.0/8.0, 2.0/3.0, 0.3])
+}
+
+def find_files(filename, search_path):
+   result = []
+    # Wlaking top-down from the root
+   for root, dir, files in os.walk(search_path):
+      if filename in files:
+         result.append(os.path.join(root, filename))
+   return result
+
+def get_json_data(file_path=None):
+    if file_path:
+        json_path = os.path.abspath(file_path)
+    else:
+        json_path = os.path.abspath(find_files('door.json', '../')[0])
+    with open(json_path,) as file:
+        data = json.load(file)
+    return data
 
 def get_scale(hx):
     doc = read_xml(hx)
@@ -49,13 +71,30 @@ def save_xml(file, doc):
     except IOError as e:
         raise FileExistsError("Failed to open output:", exc=e)
 
-
 def read_xml(file):
     try:
         doc = minidom.parse(file)
         return doc
     except IOError as e:
         raise FileExistsError("Failed to open output:", exc=e)
+
+def process_xacro(xacro_in, xacro_out, kwargs):
+    in_file =  open(xacro_in,  'r')    # open the template xacro 
+    out_file = open(xacro_out, 'w')  # write the xacro with parameters filled in
+
+    # find and replace
+    for in_line in in_file:
+        out_line = in_line.replace("${plane_xacro}",  str(kwargs['plane_xacro']))
+        out_line = out_line.replace("${handle_xacro}", str(kwargs['handle_xacro']))
+        out_line = out_line.replace("${handle_pos_x}", str(kwargs['handle_pos_x']))
+        out_line = out_line.replace("${handle_pos_y}", str(kwargs['handle_pos_y']))
+        out_line = out_line.replace("${handle_pos_z}", str(kwargs['handle_pos_z']))
+        out_line = out_line.replace("${handle_ori_r}", str(kwargs['handle_ori_r']))
+        out_line = out_line.replace("${handle_ori_p}", str(kwargs['handle_ori_p']))
+        out_line = out_line.replace("${handle_ori_y}", str(kwargs['handle_ori_y']))
+        print(out_line, end='')
+        # out_file.write(out_line)
+    out_file.close()
 
 
 def generate_door_xacro(**kwargs):
@@ -71,22 +110,10 @@ def generate_door_xacro(**kwargs):
     xacro_output = out_path + 'xacro/' + '{}_h{}'.format(door_identifier, handle_identifier) + '.xacro'
     print(xacro_output)
 
-    in_file = open(xacro_path, 'r')     # open the template xacro 
-    out_file = open(xacro_output, 'w')  # write the xacro with parameters filled in
+    # process_xacro(xacro_path, xacro_output, kwargs)
+    
+    return
 
-    # find and replace
-    for in_line in in_file:
-        out_line = in_line.replace("${plane_xacro}",  str(kwargs['plane_xacro']))
-        out_line = out_line.replace("${handle_xacro}", str(kwargs['handle_xacro']))
-        out_line = out_line.replace("${handle_pos_x}", str(kwargs['handle_pos_x']))
-        out_line = out_line.replace("${handle_pos_y}", str(kwargs['handle_pos_y']))
-        out_line = out_line.replace("${handle_pos_z}", str(kwargs['handle_pos_z']))
-        out_line = out_line.replace("${handle_ori_r}", str(kwargs['handle_ori_r']))
-        out_line = out_line.replace("${handle_ori_p}", str(kwargs['handle_ori_p']))
-        out_line = out_line.replace("${handle_ori_y}", str(kwargs['handle_ori_y']))
-        # print(out_line, end='')
-        out_file.write(out_line)
-    out_file.close()
 
     print('xacro_output: ', xacro_output)
 
@@ -122,12 +149,26 @@ def get_handle_config(scale=1.0): # use y-scale from door-xacro
 def main():
     doors_path = '../data/objs/pieces/doors/xacro/'
     handle_path = '../data/objs/pieces/handles/xacro/'
+
+    # load from json:
+    # -> load the json by the numbers of the doors and handles
+    data = get_json_data()
+    print(data)
+    
     # get numbers of available doors/handles
     door_xacros = sorted([door.split('/')[-1] for door in os.listdir(doors_path)if door.split('/')[-1].endswith('xacro')])
     handle_xacros = sorted([handle.split('/')[-1] for handle in os.listdir(handle_path) if handle.split('/')[-1].endswith('xacro')])
     print(handle_xacros)
+    return
+
+    ## TODO:
+    # when loading the files -> read the type of door and choose the possible 
+    # objects/textures from the saved json-file to generate
+
     for d in door_xacros:
         for h in handle_xacros:
+            print(d, h)
+            continue
             dx = doors_path + d
             hx = handle_path + h
             # get the y-scale to correctly scale the position of handles

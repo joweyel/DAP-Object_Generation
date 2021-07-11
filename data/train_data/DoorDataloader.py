@@ -24,7 +24,20 @@ def plotAABB(img, ax, idx):
     # plt.savefig('test/bbox_img_{}.jpg'.format(idx), dpi=200)
     plt.show()
     
-
+def check_bbox(bbox, w, h):
+    '''
+        [x0 y0]
+        [x1 y1]
+    '''
+    if bbox[0, 0] < 0 or bbox[0, 0] >= w:
+        return False
+    if bbox[1, 0] < 0 or bbox[1, 0] >= w:
+        return False
+    if bbox[0, 1] < 0 or bbox[0, 0] >= h:
+        return False
+    if bbox[1, 1] < 0 or bbox[0, 0] >= h:
+        return False
+    return True
 
 class DoorDataset(torch.utils.data.Dataset):
     def __init__(self, root, data_file, train, transforms=None):
@@ -60,20 +73,43 @@ class DoorDataset(torch.utils.data.Dataset):
         with open(feature_path, 'r') as json_file:
             features = json.load(json_file)
 
-        ## get door bounding box from segmentation-mask
-        cls = np.unique(seg_img)
-        n_cls = len(cls)
-        door_cls = cls[1]
-        y_idx, x_idx = np.where(seg_img == door_cls)
-        x_min, x_max = x_idx.min(), x_idx.max()
-        y_min, y_max = y_idx.min(), y_idx.max()
+        '''
+            ## get door bounding box from segmentation-mask
+            # cls = np.unique(seg_img)
+            # for c in cls:
+            #     print(c)
+            # n_cls = len(cls)
+            # print(n_cls)
+            # door_cls = cls[1]
+            # # y_idx, x_idx = np.where(seg_img == door_cls)
+            # out = np.where(seg_img == door_cls)
+            # y_idx = out[1]; x_idx = out[0]
+            # x_min, x_max = x_idx.min(), x_idx.max()
+            # y_min, y_max = y_idx.min(), y_idx.max()
+            # bbox_door = np.array([[x_min, y_min], [x_max, y_max]])
+        '''
         
+        boxes = []
+        labels = []
+
         ## get handle buonding box from saved features
-        bbox_door = np.array([[x_min, y_min], [x_max, y_max]])
-        # bbox_door = np.array([features['object']['min'], features['object']['max']])
-        bbox_handle = np.array([features['handle']['min'], features['handle']['max']])
         
-        ## load the axis information (maybe plot)
+        # door
+        bbox_door = np.array([features['object']['min'], features['object']['max']])
+        boxes.append(bbox_door)
+        labels.append(1)
+
+        # handle
+        bbox_handle = np.array([features['handle']['min'], features['handle']['max']])
+        height, width, _ = rgb_img.shape
+        if (check_bbox(bbox_handle, width, height)):
+            boxes.append(bbox_handle)
+            labels.append(2)
+
+
+        print('#bboxes = ', len(boxes), labels)
+        
+        ## load the axis information
         axis = features['axis']
         x0, y0 = axis[0]
         x1, y1 = axis[1]
@@ -96,10 +132,15 @@ class DoorDataset(torch.utils.data.Dataset):
 
 
         target = dict()
-        target['rgb'] = torch.tensor(rgb_img)
+        target['rgb']   = torch.tensor(rgb_img)
         target['depth'] = torch.tensor(depth_img)
-        target['seg'] = torch.tensor(seg_img)
-        target['axis'] = 0
+        # target['seg'] = torch.tensor(seg_img)
+        target['bbox']  = torch.tensor(boxes, dtype=torch.int32)
+        target['label'] = torch.LongTensor(labels)
+        # target['axis']  = axis
+
+        print(target)
+
         return target
 
     def __len__(self):
@@ -107,8 +148,10 @@ class DoorDataset(torch.utils.data.Dataset):
 
 def main():
     dds = DoorDataset(root='./', train=True, data_file=None, transforms=None)
+
     for i in range(dds.__len__()):
-        dds.__getitem__(i)
+        dds.__getitem__(i, True)
+    
     print('len = ', dds.__len__())
 
 if __name__ == '__main__':

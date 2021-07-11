@@ -43,7 +43,7 @@ def main():
     # save the updateted json-data
     with open(json_path, "w") as file:
         json.dump(data, file, indent=4)
-
+    
 
     # get all the relevant texture numbers (all these are used; some of the maybe
     # for more than one door type)
