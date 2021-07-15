@@ -26,8 +26,11 @@ def process_parameters(xacro_path, **kwargs):
     print(kwargs)
     in_file = open(xacro_path, 'r')
     out_file = open(kwargs['obj_file'].replace('.obj', '.xacro'), 'w')
+    print("out file:",kwargs['obj_file'].replace('.obj', '.xacro'))
+
     for in_line in in_file:
         in_line = in_line.replace('${floor_mesh_file}', str(kwargs['floor_mesh_file']))
+        in_line = in_line.replace('${wall_mesh_file}', str("../data/objs/pieces/floor/mesh/wall_brick.obj"))
         print(in_line, end='')
         out_file.write(in_line)
     pass
@@ -40,7 +43,6 @@ def generate_floor(xacro_path):
     floor_mesh_path = '/'.join(xacro_path.split('/')[:-1]) + '/mesh/'
     print(floor_mesh_path)
     objs = sorted([obj for obj in os.listdir(floor_mesh_path) if obj.endswith('obj')])
-    print(objs)
 
     # args = [os.path.join(os.getcwd(), door_path)] #
 
@@ -51,6 +53,7 @@ def generate_floor(xacro_path):
     # opts, input_file_name = xacro.process_args(args)
     # print(opts, input_file_name)
     # doc = xacro.process_file(input_file_name, **vars(opts))
+    print("OBJS:",objs)
 
 
     for obj_file in objs:
@@ -67,9 +70,9 @@ def generate_floor(xacro_path):
         #print(pretty_xml_as_string)
 
 def main():
-    floor_path = '../data/objs/pieces/floor/'
-    floor_xacro_template = '../data/objs/pieces/floor/floor.xacro'
-    generate_floor(floor_xacro_template)
+    #floor_path = '../data/objs/pieces/floor/'
+    environment_xacro_template = '../data/objs/pieces/floor/env.xacro'
+    generate_floor(environment_xacro_template)
     pass
 
 if __name__ == '__main__':
