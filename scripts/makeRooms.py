@@ -13,67 +13,91 @@ import xacro
 from xml.dom import minidom
 import subprocess
 
-
 def save_xml(file, doc):
     try:
         out = open(file, 'w')
         out.write(doc.toprettyxml(indent='  '))
         out.close()
     except IOError as e:
-        raise FileExistsError("Failed to open output:", exc=e)
+        raise Exception("Failed to open output:", exc=e)
 
-def process_parameters(xacro_path, **kwargs):
-    print(kwargs)
+
+def process_xacro2(xacro_path, **kwargs):
     in_file = open(xacro_path, 'r')
-    out_file = open(kwargs['obj_file'].replace('.obj', '.xacro'), 'w')
-    print("out file:",kwargs['obj_file'].replace('.obj', '.xacro'))
+    # out_file = open() # TODO
 
     for in_line in in_file:
-        in_line = in_line.replace('${floor_mesh_file}', str(kwargs['floor_mesh_file']))
-        in_line = in_line.replace('${wall_mesh_file}', str("../data/objs/pieces/floor/mesh/wall_brick.obj"))
+        in_line = in_line.replace('${floor_mesh_file}', 
+                                  str(kwargs['floor_mesh_file']))
+        in_line = in_line.replace('${wall_mesh_file}',
+                                  str(kwargs['wall_mesh_file']))
         print(in_line, end='')
-        out_file.write(in_line)
-    pass
 
-def generate_room(xacro_path):
-    pass
+    # TODO
 
 
-def generate_floor(xacro_path):
-    floor_mesh_path = '/'.join(xacro_path.split('/')[:-1]) + '/mesh/'
-    print(floor_mesh_path)
-    objs = sorted([obj for obj in os.listdir(floor_mesh_path) if obj.endswith('obj')])
+def process_xacro(xacro_path, **kwargs):
+    print('process_xaro called with:')
+    print('Xacro-Path: ', xacro_path)
 
-    # args = [os.path.join(os.getcwd(), door_path)] #
+    # insert the parameters in the xacro template
+    args = [xacro_path]
+    for key, val in kwargs.items():
+        args.append(key + ":=" + str(val))
+    print(args)
 
-    # for key, value in kwargs.items():
-    #     args.append(key + ":=" + str(value))
-    # print(args)
+    for key, value in kwargs.items():
+        args.append(key + ":=" + str(value))
+    print(args)
     
-    # opts, input_file_name = xacro.process_args(args)
-    # print(opts, input_file_name)
-    # doc = xacro.process_file(input_file_name, **vars(opts))
-    print("OBJS:",objs)
+    opts, input_file_name = xacro.process_args(args)
+    print(opts, input_file_name)
+
+    return
+    ## TODO: somehow the replacing does not work correctly (Exception)
+    doc = xacro.process_file(input_file_name, **vars(opts))
+    doc_string = doc.toprettyxml()
+    print(doc)
+
+    ## TODO: see "xacroFinal.py" on how to save the xacros/urdfs
+    out_path = '../data/objs/pieces/envs/urdf/'
+    # Generate urdf-file in the designated folder
+    urdf_out = out_path + 'urdf/' + urdf_file
+    save_xml(urdf_out, doc)
+    os.system('rm ' + os.getcwd() + '/' + xacro_file) # cleaning up
+
+    print('\n')
+
+def load_objs(path):
+    objs = [path + file for file in os.listdir(path) if file.endswith('.obj')]
+    return objs
+
+def generate_env(xacro_path):
+
+    # load paths to objects to use in the environment
+    mesh_path = xacro_path.replace(os.path.basename(xacro_path), 'mesh/')
+    floor_path = os.path.join(mesh_path, 'floor/')
+    wall_path = os.path.join(mesh_path, 'wall/')
+
+    floors = load_objs(floor_path)    
+    walls = load_objs(wall_path)
+
+    for f in floors:
+        for w in walls:
+            # process_xacro(xacro_path, floor_mesh_file=f, wall_mesh_file=w)
+            # process_xacro2(xacro_path, floor_mesh_file=f, wall_mesh_file=w)
+            pass
+    
 
 
-    for obj_file in objs:
-        obj_path = floor_mesh_path + obj_file
-        process_parameters(xacro_path, obj_file=obj_file, floor_mesh_file=obj_path)
-
-        pass
-        #args = [xacro_path, 'floor_mesh_file:=' + floor_mesh_path + obj_file]
-        #opts, input_file_name = xacro.process_args(args)
-        #print(opts, input_file_name)
-        #doc = xacro.process_file(input_file_name, **vars(opts))
-        #save_xml(obj_file + '.xacro', doc)
-        #pretty_xml_as_string = doc.toprettyxml()
-        #print(pretty_xml_as_string)
 
 def main():
-    #floor_path = '../data/objs/pieces/floor/'
-    environment_xacro_template = '../data/objs/pieces/floor/env.xacro'
-    generate_floor(environment_xacro_template)
-    pass
+    env_xacro_template = '../data/objs/pieces/envs/env.xacro'
+
+    if os.path.exists(env_xacro_template):
+        generate_env(env_xacro_template)
+    else:
+        print('Environment-Template not found')
 
 if __name__ == '__main__':
     main()

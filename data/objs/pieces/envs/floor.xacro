@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="floor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="floor_plane" params="floor_mesh_file">
+        <link name="world"/>
+
+        <link name="floor_plane">
+            <visual>
+                <origin xyz="0 0 0" />
+                <geometry>
+                    <mesh filename="${floor_mesh_file}" rpy="0 0 0" scale="1.0 1.0 1.0" />
+                </geometry>
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" />
+                <geometry>
+                    <mesh filename="${floor_mesh_file}" rpy="0 0 0" scale="1.0 1.0 1.0" />
+                </geometry>
+            </collision>
+        </link>
+
+        <joint name="world_floor" type="fixed">
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <parent link="world" />
+            <child link="floor_plane" />
+            <axis xyz="0 0 0" />
+            <dynamics friction="0.4960139088111456" />
+            <limit lower="0.0" upper="1.57"/>
+        </joint>
+
+    </xacro:macro>
+
+</robot>
