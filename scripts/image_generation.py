@@ -202,68 +202,82 @@ def get_rotation_axis(plane_bb, handle_bb):
                 [(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[1][1], plane_bb[1][2]]]
     return axis
 
-def generate_data_imgs(plane_bb, handle_bb, urdf_input, eye_xs, eye_ys, eye_zs, tar_ys, tar_zs):
-    for eye_x in eye_xs:
-        for eye_y in eye_ys:
-            for eye_z in eye_zs:
-                for tar_y in tar_ys:
-                    for tar_z in tar_zs:
-                        viewMatrix = p.computeViewMatrix(
-                            cameraEyePosition=[eye_x, tar_y, eye_z],
-                            cameraTargetPosition=[0, tar_y, tar_z],
-                            cameraUpVector=[0, 0, 1])
+def set_door_angle(goal_angle, obj):
+    p.setJointMotorControl2(obj, 0, p.POSITION_CONTROL, goal_angle, force=999)
+    while p.getJointState(obj, 0)[0] < goal_angle - 0.001:
+        p.stepSimulation()
+        time.sleep(1. / 240.)
 
-                        projectionMatrix = p.computeProjectionMatrixFOV(
-                            fov=45.0,
-                            aspect=1.0,
-                            nearVal=0.1,
-                            farVal=20.1)
+def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_ys, tar_zs, door_angles):
+    for door_angle in door_angles:
+        for eye_x in eye_xs:
+            for eye_y in eye_ys:
+                for eye_z in eye_zs:
+                    for tar_y in tar_ys:
+                        for tar_z in tar_zs:
+                            viewMatrix = p.computeViewMatrix(
+                                cameraEyePosition=[eye_x, tar_y, eye_z],
+                                cameraTargetPosition=[0, tar_y, tar_z],
+                                cameraUpVector=[0, 0, 1])
 
-                        width, height, rgbImg, depthImg, segImg = p.getCameraImage(
-                            width=400,
-                            height=400,
-                            viewMatrix=viewMatrix,
-                            projectionMatrix=projectionMatrix)
+                            projectionMatrix = p.computeProjectionMatrixFOV(
+                                fov=45.0,
+                                aspect=1.0,
+                                nearVal=0.1,
+                                farVal=20.1)
 
-
-                        plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
-                                                    viewMatrix=viewMatrix, imwidth=width, imheight=height),
-                                       world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
-                                                    viewMatrix=viewMatrix, imwidth=width, imheight=height)]
-                        handle_bb_im = [world_to_img(world_coord=handle_bb[0], projectionMatrix=projectionMatrix,
-                                                    viewMatrix=viewMatrix, imwidth=width, imheight=height),
-                                       world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
-                                                    viewMatrix=viewMatrix, imwidth=width, imheight=height)]
-
-                        sample_name=urdf_input.replace('.urdf','')+"_ex_" + str(eye_x) + "_ey_" + str(eye_y) + "_ez_" + str(
-                                eye_z) + "_ty_" + str(tar_y) + "_tz_" + str(tar_z)+".FORMAT"
+                            width, height, rgbImg, depthImg, segImg = p.getCameraImage(
+                                width=400,
+                                height=400,
+                                viewMatrix=viewMatrix,
+                                projectionMatrix=projectionMatrix)
+                            set_door_angle(door_angle,obj)
+                            plane_bb=p.getAABB(obj, linkIndex=0)
+                            handle_bb=p.getAABB(obj, linkIndex=1)
 
 
-                        axis = get_rotation_axis(plane_bb, handle_bb)
-                        axis_img = [
-                            world_to_img(world_coord=axis[0], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
-                                         imwidth=width, imheight=height),
-                            world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
-                                         imwidth=width, imheight=height)]
 
-                        if good_image(bb_img=plane_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
-                                      iou_weight=1.0, min_score=0.7):
-                            generate_datapoint(sample_name,
-                                               bb_door=plane_bb_im,
-                                               bb_handle=handle_bb_im,
-                                               rotation=axis_img, json_path=None,
-                                               rgb_img=rgbImg, depth_img=depthImg,
-                                               seg_img=segImg)
+                            plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
+                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height),
+                                           world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
+                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+                            handle_bb_im = [world_to_img(world_coord=handle_bb[0], projectionMatrix=projectionMatrix,
+                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height),
+                                           world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
+                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height)]
 
-def main(urdf_input):
-    p.connect(p.GUI)
+                            sample_name=env_input.replace('.urdf','')+urdf_input.replace('.urdf','')+"_ex_" + str(eye_x) + "_ey_" + str(eye_y) + "_ez_" + str(
+                                    eye_z) + "_ty_" + str(tar_y) + "_tz_" + str(tar_z)+ "_da_" + str(door_angle)+".FORMAT"
+
+
+                            axis = get_rotation_axis(plane_bb, handle_bb)
+                            axis_img = [
+                                world_to_img(world_coord=axis[0], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
+                                             imwidth=width, imheight=height),
+                                world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
+                                             imwidth=width, imheight=height)]
+
+                            if good_image(bb_img=plane_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
+                                          iou_weight=1.0, min_score=0.7):
+                                generate_datapoint(sample_name,
+                                                   bb_door=plane_bb_im,
+                                                   bb_handle=handle_bb_im,
+                                                   rotation=axis_img, json_path=None,
+                                                   rgb_img=rgbImg, depth_img=depthImg,
+                                                   seg_img=segImg)
+
+def main(*argv):
+    #p.connect(p.GUI)
+    p.connect(p.DIRECT)
     p.setGravity(0, 0, -9.8)
     p.setTimeStep(1. / 240.)
 
     floor = os.path.join(pybullet_data.getDataPath(), "mjcf/ground_plane.xml")
-    p.loadMJCF(floor)
+    #p.loadMJCF(floor)
+    env = p.loadURDF(argv[1])
+    obj = p.loadURDF(argv[0])
+    p.resetBasePositionAndOrientation(obj, [0.01,0,0.0], p.getBasePositionAndOrientation(obj)[1])
 
-    obj = p.loadURDF(urdf_input)
 
     # Plane Bounding Box
     plane_bb = p.getAABB(obj, linkIndex=0)
@@ -275,7 +289,7 @@ def main(urdf_input):
 
     # Get rotation axis
     axis=get_rotation_axis(plane_bb=plane_bb, handle_bb=handle_bb)
-    drawAABB(axis)
+    #drawAABB(axis)
 
     eye_xs = np.linspace(3, 1, 3)
     eye_ys = np.linspace(-1.0, 1.0, 5)
@@ -283,12 +297,16 @@ def main(urdf_input):
 
     tar_ys = np.linspace(-1.0, 1.0, 5)
     tar_zs = np.linspace(0.0, 2, 5)
-    generate_data_imgs(plane_bb=plane_bb, handle_bb=handle_bb, urdf_input=urdf_input,
-                       eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs)
+
+
+
+    generate_data_imgs(obj=obj, urdf_input=argv[0], env_input=argv[1],
+                       eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs, door_angles=[0.0, 0.5])
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()
         time.sleep(1. / 240.)
+
 
     p.disconnect()
 
@@ -298,5 +316,6 @@ if __name__ == '__main__':
         print("No urdf specified. Aborting!")
         exit(-1)
     urdf_input = sys.argv[1]
+    env_input = sys.argv[2]
 
-    main(urdf_input)
+    main(urdf_input, env_input)
