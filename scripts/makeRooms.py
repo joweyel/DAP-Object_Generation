@@ -24,49 +24,61 @@ def save_xml(file, doc):
 
 def process_xacro2(xacro_path, **kwargs):
     in_file = open(xacro_path, 'r')
-    # out_file = open() # TODO
+    fmf=os.path.basename(kwargs['floor_mesh_file']).split('.')[0]
+    wmf = os.path.basename(kwargs['wall_mesh_file']).split('.')[0]
+
+    out_file = open(fmf+"_"+wmf+".urdf",'w') # TODO
 
     for in_line in in_file:
         in_line = in_line.replace('${floor_mesh_file}', 
                                   str(kwargs['floor_mesh_file']))
         in_line = in_line.replace('${wall_mesh_file}',
                                   str(kwargs['wall_mesh_file']))
-        print(in_line, end='')
+        #print(in_line, end='')
+        out_file.write(in_line)
+    out_file.close()
+    in_file.close()
+
+
+
+
 
     # TODO
 
 
 def process_xacro(xacro_path, **kwargs):
-    print('process_xaro called with:')
-    print('Xacro-Path: ', xacro_path)
+    #print('process_xaro called with:')
+    #print('Xacro-Path: ', xacro_path)
 
     # insert the parameters in the xacro template
     args = [xacro_path]
     for key, val in kwargs.items():
         args.append(key + ":=" + str(val))
-    print(args)
-
-    for key, value in kwargs.items():
-        args.append(key + ":=" + str(value))
-    print(args)
+    #print(args)
     
     opts, input_file_name = xacro.process_args(args)
-    print(opts, input_file_name)
+    for k,v in kwargs.items():
+        print("key:",k,"val:",v)
+    print("opts;",opts)
 
-    return
+    #return
     ## TODO: somehow the replacing does not work correctly (Exception)
-    doc = xacro.process_file(input_file_name, **vars(opts))
+    #doc = xacro.process_file(input_file_name, **vars(opts))
+    doc = xacro.process_file(input_file_name, mappings={})
     doc_string = doc.toprettyxml()
-    print(doc)
+    #print(doc)
 
     ## TODO: see "xacroFinal.py" on how to save the xacros/urdfs
     out_path = '../data/objs/pieces/envs/urdf/'
     # Generate urdf-file in the designated folder
-    urdf_out = out_path + 'urdf/' + urdf_file
+    urdf_file="wall_floor.urdf"
+    urdf_out = out_path + urdf_file
+    print("os cwd:",os.getcwd())
+    print("URDF out:",urdf_out)
     save_xml(urdf_out, doc)
     os.system('rm ' + os.getcwd() + '/' + xacro_file) # cleaning up
 
-    print('\n')
+    #print('\n')
 
 def load_objs(path):
     objs = [path + file for file in os.listdir(path) if file.endswith('.obj')]
@@ -84,15 +96,15 @@ def generate_env(xacro_path):
 
     for f in floors:
         for w in walls:
-            # process_xacro(xacro_path, floor_mesh_file=f, wall_mesh_file=w)
-            # process_xacro2(xacro_path, floor_mesh_file=f, wall_mesh_file=w)
+            #process_xacro(xacro_path, floor_mesh_file=f, wall_mesh_file=w)
+            process_xacro2(xacro_path, floor_mesh_file=f, wall_mesh_file=w)
             pass
     
 
 
 
 def main():
-    env_xacro_template = '../data/objs/pieces/envs/env.xacro'
+    env_xacro_template = '../data/objs/pieces/envs/env.urdf'
 
     if os.path.exists(env_xacro_template):
         generate_env(env_xacro_template)
