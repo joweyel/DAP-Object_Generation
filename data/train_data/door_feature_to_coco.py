@@ -67,10 +67,14 @@ def main(path):
 
         currentId+=1
 
+    all = {
+        'images': images,
+        'categories': categories,
+        'annotations': annotations
+    }
+
     with open('coco.json', 'w') as f:
-        json.dump(images, f, indent=4)
-        json.dump(annotations, f, indent=4)
-        json.dump(categories, f, indent=4)
+        json.dump(all, f, indent=4)
 
         # https://www.immersivelimit.com/tutorials/create-coco-annotations-from-scratch
         ## generate json (bbox-detection + axis-prediction):
