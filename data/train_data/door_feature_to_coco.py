@@ -15,7 +15,8 @@ def main(path):
     images = []
     annotations= []
     categories = []
-    currentId=0
+    current_img_id=1
+    current_ann_id=1
 
 
     for f in features:
@@ -37,35 +38,47 @@ def main(path):
         'file_name': rgb_path,
         'height': 400,
         'width': 400,
-        'id': 0,
-        'id': currentId
+        'id': current_img_id
         }
+
         images.append(image)
 
-        annotation = {
-            'id': currentId,
-            'image_id': currentId,
-            'bbox': [
-                plane_bb_min[0],
-                plane_bb_min[1],
-                plane_bb_max[0],
-                plane_bb_max[1]
-            ],
-            'area': 100,
+        plane_annotation = {
+            'id': current_ann_id,
+            'image_id': current_img_id,
+            'bbox': pb_to_coco_bb(plane_bb_min, plane_bb_max),
+            'area': 0,
             'iscrowd': 0,
-            'category_id': 0,
+            'category_id': 1,
             'segmentation': []
         }
-        annotations.append(annotation)
+        current_ann_id += 1
+        annotations.append(plane_annotation)
 
-        category= {
-            'supercategory': "testcategory.obj",
-            'id': currentId,
-            'name': "door"
+        handle_annotation = {
+            'id': current_ann_id,
+            'image_id': current_img_id,
+            'bbox': pb_to_coco_bb(handle_bb_min, handle_bb_max),
+            'area': 0,
+            'iscrowd': 0,
+            'category_id': 2,
+            'segmentation': []
         }
-        categories.append(category)
+        annotations.append(handle_annotation)
+        current_ann_id += 1
+        current_img_id += 1
 
-        currentId+=1
+
+    categories.append({
+        'supercategory': "Door_plane",
+        'id': 1,
+        'name': "door_plane"
+    })
+    categories.append({
+        'supercategory': "Door_handle",
+        'id': 2,
+        'name': "door_handle"
+    })
 
     all = {
         'images': images,
@@ -81,6 +94,13 @@ def main(path):
         # 1.) images
         # 2.) categories
         # 3.) annotations
+
+def pb_to_coco_bb(pb_bb_min, pb_bb_max):
+    width=abs(pb_bb_min[0]-pb_bb_max[0])
+    height= abs(pb_bb_min[1] - pb_bb_max[1])
+    top_left_x=min(pb_bb_min[0], pb_bb_max[0])
+    top_left_y = min(pb_bb_min[1], pb_bb_max[1])
+    return [top_left_x, top_left_y, width, height]
 
 
 if __name__ == '__main__':
