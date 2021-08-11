@@ -35,7 +35,7 @@ def main(path):
 
 
         image={
-        'file_name': rgb_path,
+        'file_name': base_name+ '_rgb.png',
         'height': 400,
         'width': 400,
         'id': current_img_id
