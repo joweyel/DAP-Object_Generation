@@ -176,8 +176,8 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
 
     # save images
     if 'rgb_img' in kwargs.keys():
-        rgb_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_rgb.png')  # or jpg
-        plt.imsave(rgb_out,kwargs['rgb_img'], format='png')
+        rgb_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_rgb.jpg')  # or jpg
+        plt.imsave(rgb_out,kwargs['rgb_img'], format='jpg')
 
     if 'depth_img' in kwargs.keys():
         depth_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_depth.png')
@@ -301,7 +301,7 @@ def main(*argv):
 
 
     generate_data_imgs(obj=obj, urdf_input=argv[0], env_input=argv[1],
-                       eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs, door_angles=[0.0, 0.5])
+                       eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs, door_angles=[0.0])
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()
