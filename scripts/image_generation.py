@@ -245,6 +245,7 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                            world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+                            handle_bb_im = clip_to_im(point_2d=handle_bb_im, imwidth=width, imheight=height)
 
                             sample_name=env_input.replace('.urdf','')+urdf_input.replace('.urdf','')+"_ex_" + str(eye_x) + "_ey_" + str(eye_y) + "_ez_" + str(
                                     eye_z) + "_ty_" + str(tar_y) + "_tz_" + str(tar_z)+ "_da_" + str(door_angle)+".FORMAT"
@@ -256,7 +257,8 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                              imwidth=width, imheight=height),
                                 world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
                                              imwidth=width, imheight=height)]
-
+                            axis_img = clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
+                            
                             if good_image(bb_img=plane_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
                                           iou_weight=1.0, min_score=0.7):
                                 generate_datapoint(sample_name,
@@ -266,9 +268,16 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
 
+def clip_to_im(point_2d, imwidth, imheight):
+    point_2d[0][0] = int(np.clip(point_2d[0][0], 0, imwidth))
+    point_2d[1][0] = int(np.clip(point_2d[1][0], 0, imwidth))
+    point_2d[0][1] = int(np.clip(point_2d[0][1], 0, imheight))
+    point_2d[1][1] = int(np.clip(point_2d[1][1], 0, imheight))
+    return point_2d
+
 def main(*argv):
-    #p.connect(p.GUI)
-    p.connect(p.DIRECT)
+    p.connect(p.GUI)
+    #p.connect(p.DIRECT)
     p.setGravity(0, 0, -9.8)
     p.setTimeStep(1. / 240.)
 
