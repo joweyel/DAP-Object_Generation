@@ -261,6 +261,7 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                 world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
                                              imwidth=width, imheight=height)]
 
+                            axis_img = clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
                             if good_image(plane_bb_img=plane_bb_im, handle_bb_img=handle_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
                                           iou_weight=1.0, min_score=0.7):
                                 generate_datapoint(sample_name,
@@ -270,11 +271,11 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
 
-def clip_o_im(point_2d, imwidth, imheight):
-    point_2d[0][0] = np.clip(point_2d[0][0], 0, imwidth)
-    point_2d[1][0] = np.clip(point_2d[1][0], 0, imwidth)
-    point_2d[0][1] = np.clip(point_2d[0][1], 0, imheight)
-    point_2d[1][1] = np.clip(point_2d[1][1], 0, imheight)
+def clip_to_im(point_2d, imwidth, imheight):
+    point_2d[0][0] = int(np.clip(point_2d[0][0], 0, imwidth))
+    point_2d[1][0] = int(np.clip(point_2d[1][0], 0, imwidth))
+    point_2d[0][1] = int(np.clip(point_2d[0][1], 0, imheight))
+    point_2d[1][1] = int(np.clip(point_2d[1][1], 0, imheight))
     return point_2d
 
 def main(*argv):
