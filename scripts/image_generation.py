@@ -30,11 +30,12 @@ def rotation_axis_covered(axis_img, imwidth, imheight):
         return True
     return False
 
-def good_image(bb_img, axis_img, imwidth, imheight, min_ec=0.5, ec_weight=1.0, iou_weight=1.0, min_score=0.5):
-    ec=edge_coverage(bb_img, imwidth, imheight)
-    iou=check_coverage(bb_img, imwidth,imheight)
+def good_image(plane_bb_img, handle_bb_img, axis_img, imwidth, imheight, min_ec=0.5, ec_weight=1.0, iou_weight=1.0, min_score=0.5):
+    ec=edge_coverage(plane_bb_img, imwidth, imheight)
+    iou_plane=check_coverage(plane_bb_img, imwidth, imheight)
+    handle_covered=check_coverage(handle_bb_img, imwidth, imheight)>0.9
     axis_covered=rotation_axis_covered(axis_img=axis_img, imwidth=imwidth, imheight=imheight)
-    score=(ec*ec_weight+iou*iou_weight)/(ec_weight+iou_weight) if ec>=min_ec and axis_covered else 0
+    score=(ec*ec_weight+iou_plane*iou_weight)/(ec_weight+iou_weight) if ec>=min_ec and axis_covered and handle_covered else 0
     return score>=min_score
 
 def iou_coverage(bb, image_bb):
@@ -45,7 +46,9 @@ def iou_coverage(bb, image_bb):
 
     intersection = bb_shape.intersection(im_shape).area
     union = bb_shape.union(im_shape).area
-    iou = intersection / union
+    if union>0:
+        iou = intersection / union
+    else: iou=0
     return iou
 
 def edge_coverage(bb, imwidth, imheight):
@@ -245,10 +248,10 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                            world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height)]
-                            handle_bb_im = clip_to_im(point_2d=handle_bb_im, imwidth=width, imheight=height)
 
                             sample_name=env_input.replace('.urdf','')+urdf_input.replace('.urdf','')+"_ex_" + str(eye_x) + "_ey_" + str(eye_y) + "_ez_" + str(
                                     eye_z) + "_ty_" + str(tar_y) + "_tz_" + str(tar_z)+ "_da_" + str(door_angle)+".FORMAT"
+
 
 
                             axis = get_rotation_axis(plane_bb, handle_bb)
@@ -257,9 +260,8 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                              imwidth=width, imheight=height),
                                 world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
                                              imwidth=width, imheight=height)]
-                            axis_img = clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
-                            
-                            if good_image(bb_img=plane_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
+
+                            if good_image(plane_bb_img=plane_bb_im, handle_bb_img=handle_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
                                           iou_weight=1.0, min_score=0.7):
                                 generate_datapoint(sample_name,
                                                    bb_door=plane_bb_im,
@@ -268,16 +270,16 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
 
-def clip_to_im(point_2d, imwidth, imheight):
-    point_2d[0][0] = int(np.clip(point_2d[0][0], 0, imwidth))
-    point_2d[1][0] = int(np.clip(point_2d[1][0], 0, imwidth))
-    point_2d[0][1] = int(np.clip(point_2d[0][1], 0, imheight))
-    point_2d[1][1] = int(np.clip(point_2d[1][1], 0, imheight))
+def clip_o_im(point_2d, imwidth, imheight):
+    point_2d[0][0] = np.clip(point_2d[0][0], 0, imwidth)
+    point_2d[1][0] = np.clip(point_2d[1][0], 0, imwidth)
+    point_2d[0][1] = np.clip(point_2d[0][1], 0, imheight)
+    point_2d[1][1] = np.clip(point_2d[1][1], 0, imheight)
     return point_2d
 
 def main(*argv):
-    p.connect(p.GUI)
-    #p.connect(p.DIRECT)
+    #p.connect(p.GUI)
+    p.connect(p.DIRECT)
     p.setGravity(0, 0, -9.8)
     p.setTimeStep(1. / 240.)
 
@@ -306,11 +308,18 @@ def main(*argv):
 
     tar_ys = np.linspace(-1.0, 1.0, 5)
     tar_zs = np.linspace(0.0, 2, 5)
+    """eye_xs = np.linspace(3, 1, 2)
+    eye_ys = np.linspace(-0.5, 0.5, 2)
+    eye_zs = np.linspace(0.5, 2.0, 2)
+
+    tar_ys = np.linspace(-0.5, 0.5, 2)
+    tar_zs = np.linspace(0.0, 2, 2)"""
 
 
 
     generate_data_imgs(obj=obj, urdf_input=argv[0], env_input=argv[1],
                        eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs, door_angles=[0.0])
+    sys.exit()
 
     for _ in range(24000):  # at least 100 seconds
         p.stepSimulation()
