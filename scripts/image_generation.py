@@ -158,7 +158,7 @@ def get_json_data(file_path=None):
     return data
 
 
-def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, **kwargs):
+def generate_datapoint(file_name, bb_door, bb_handle, rotation, axis_is_left, json_path=None, **kwargs):
     '''
         Function: saves images and its corresponding features (in a json-file)
         Input:
@@ -174,8 +174,7 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
     data['handle']['min'] = bb_handle[0]
     data['handle']['max'] = bb_handle[1]
     data['axis'] = rotation
-
-    file_name = os.path.basename(file_name)
+    data['axis_is_left'] = axis_is_left
 
     # save images
     if 'rgb_img' in kwargs.keys():
@@ -197,19 +196,21 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, json_path=None, 
 def get_rotation_axis(plane_bb, handle_bb):
     handle_center_y = (handle_bb[0][1] + handle_bb[1][1]) / 2
     plane_center_y = (plane_bb[0][1] + plane_bb[1][1]) / 2
-    if handle_center_y > plane_center_y:
+    axis_is_left=1 if handle_center_y > plane_center_y else 0
+    if axis_is_left==1:
         axis = [[(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[0][1], plane_bb[0][2]],
                 [(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[0][1], plane_bb[1][2]]]
     else:
         axis = [[(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[1][1], plane_bb[0][2]],
                 [(plane_bb[0][0] + plane_bb[1][0]) / 2, plane_bb[1][1], plane_bb[1][2]]]
-    return axis
+    return axis_is_left, axis
 
 def set_door_angle(goal_angle, obj):
     p.setJointMotorControl2(obj, 0, p.POSITION_CONTROL, goal_angle, force=999)
     while p.getJointState(obj, 0)[0] < goal_angle - 0.001:
         p.stepSimulation()
         time.sleep(1. / 240.)
+
 
 def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_ys, tar_zs, door_angles):
     for door_angle in door_angles:
@@ -248,13 +249,15 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                            world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+                            door_name=os.path.basename(urdf_input.replace('.urdf', ''))
+                            env_name=os.path.basename(env_input.replace('.urdf',''))
 
-                            sample_name=env_input.replace('.urdf','')+urdf_input.replace('.urdf','')+"_ex_" + str(eye_x) + "_ey_" + str(eye_y) + "_ez_" + str(
-                                    eye_z) + "_ty_" + str(tar_y) + "_tz_" + str(tar_z)+ "_da_" + str(door_angle)+".FORMAT"
+                            sample_name=str(env_name+"_"+door_name+"_ex_" + str('%.4s'%eye_x) + "_ey_" + str('%.4s'%eye_y) + "_ez_" + str(
+                                    '%.4s'%eye_z) + "_ty_" + str('%.4s'%tar_y) + "_tz_" + str('%.4s'%tar_z)+ "_da_" + str('%.4s'%door_angle)+".FORMAT")
 
 
 
-                            axis = get_rotation_axis(plane_bb, handle_bb)
+                            axis_is_left, axis = get_rotation_axis(plane_bb, handle_bb)
                             axis_img = [
                                 world_to_img(world_coord=axis[0], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
                                              imwidth=width, imheight=height),
@@ -267,7 +270,7 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                 generate_datapoint(sample_name,
                                                    bb_door=plane_bb_im,
                                                    bb_handle=handle_bb_im,
-                                                   rotation=axis_img, json_path=None,
+                                                   rotation=axis_img, axis_is_left=axis_is_left, json_path=None,
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
 
@@ -300,15 +303,21 @@ def main(*argv):
     # drawAABB(handle_bb)
 
     # Get rotation axis
-    axis=get_rotation_axis(plane_bb=plane_bb, handle_bb=handle_bb)
+    #axis_is_left, axis=get_rotation_axis(plane_bb=plane_bb, handle_bb=handle_bb)
     #drawAABB(axis)
 
-    eye_xs = np.linspace(3, 1, 3)
+    """eye_xs = np.linspace(3, 1, 3)
     eye_ys = np.linspace(-1.0, 1.0, 5)
     eye_zs = np.linspace(0.5, 2.0, 4)
 
     tar_ys = np.linspace(-1.0, 1.0, 5)
-    tar_zs = np.linspace(0.0, 2, 5)
+    tar_zs = np.linspace(0.0, 2, 5)"""
+    eye_xs = np.linspace(3, 1, 3)
+    eye_ys = np.linspace(-1.0, 1.0, 3)
+    eye_zs = np.linspace(0.5, 2.0, 3)
+
+    tar_ys = np.linspace(-1.0, 1.0, 4)
+    tar_zs = np.linspace(0.0, 2, 3)
     """eye_xs = np.linspace(3, 1, 2)
     eye_ys = np.linspace(-0.5, 0.5, 2)
     eye_zs = np.linspace(0.5, 2.0, 2)
