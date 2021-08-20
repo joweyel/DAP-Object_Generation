@@ -27,14 +27,19 @@ def main(path):
     sum_sq = torch.tensor([0.0, 0.0, 0.0])
 
     for images in im_loader:
-        sum += images.sum(axis = [0, 1, 2])
-        sum_sq += (images ** 2).sum(axis = [0, 1, 2])
+        sum += images.sum(axis = [0, 1, 2])/255
+        sum_sq += (images ** 2).sum(axis = [0, 1, 2])/255
+
 
     val_counter=jpg_dataset.__len__()*jpg_dataset.__getitem__(0).shape[0]*jpg_dataset.__getitem__(0).shape[1]
+    print("val coutner:",val_counter)
     mean=sum/val_counter
-    std=torch.abs(torch.sqrt(torch.abs((sum_sq/val_counter)-(mean**2)))-mean)
+    total_var=abs((sum_sq/val_counter)-(mean**2))
+    print("total var:",total_var)
+    total_std=torch.sqrt(total_var)
+    total_mean=mean
 
-    print("Mean: ",mean," std: ", str(std))
+    print("Mean: ",total_mean," std: ", str(total_std))
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
