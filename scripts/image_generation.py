@@ -10,7 +10,8 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-from shapely.geometry import box, Polygon
+from shapely.geometry import box, Polygon, LineString, Point
+import shapely
 
 
 def check_coverage(bb, imwidth, imheight):
@@ -264,13 +265,14 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                 world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
                                              imwidth=width, imheight=height)]
 
-                            axis_img = clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
+
+                            #axis_img = [clip_axis_point(axis_img[0],axis_img[1],400,400), clip_axis_point(axis_img[1],axis_img[0],400,400)]#clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
                             if good_image(plane_bb_img=plane_bb_im, handle_bb_img=handle_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
                                           iou_weight=1.0, min_score=0.7):
                                 generate_datapoint(sample_name,
                                                    bb_door=plane_bb_im,
                                                    bb_handle=handle_bb_im,
-                                                   rotation=axis_img, axis_is_right=axis_is_right, json_path=None,
+                                                   rotation=[clip_axis_point(axis_img[0],axis_img[1],400,400),clip_axis_point(axis_img[1],axis_img[0],400,400)], axis_is_right=axis_is_right, json_path=None,
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
 
@@ -280,6 +282,39 @@ def clip_to_im(point_2d, imwidth, imheight):
     point_2d[0][1] = int(np.clip(point_2d[0][1], 0, imheight))
     point_2d[1][1] = int(np.clip(point_2d[1][1], 0, imheight))
     return point_2d
+
+def get_axis_intersection(axis):
+    line1=LineString([[10,10],[0,0]])
+    line2=LineString([[0,8],[10,0]])
+
+    int_pt=line1.intersection(line2)
+    if line1.crosses(line2):
+        point_of_intersection= int_pt.x, int_pt.y
+        print(point_of_intersection)
+    else: print("Doesn't cross!!!")
+
+def clip_axis_point(point, target_point, imwidth, imheight):
+    if point[0]>=0 and point[0]<imwidth and point[1]>=0 and point[1]<imheight:
+        return point
+    else:
+        left_axis=LineString([[0,0],[0, imheight]])
+        right_axis=LineString([[imwidth,0],[imwidth,imheight]])
+        bottom_axis=LineString([[0,imheight],[imwidth,imheight]])
+        top_axis=LineString([[0,0],[imwidth,0]])
+
+        point_line=LineString([point, target_point])
+
+        if point_line.crosses(left_axis):
+            point=[point_line.intersection(left_axis).x,point_line.intersection(left_axis).y]
+        elif point_line.crosses(right_axis):
+            point=[point_line.intersection(right_axis).x,point_line.intersection(right_axis).y]
+        elif point_line.crosses(top_axis):
+            point=[point_line.intersection(top_axis).x,point_line.intersection(top_axis).y]
+        elif point_line.crosses(bottom_axis):
+            point=[point_line.intersection(bottom_axis).x,point_line.intersection(bottom_axis).y]
+        return [int(np.clip(point[0], 0, imwidth-1)), int(np.clip(point[1], 0, imheight-1))]
+
+
 
 def main(*argv):
     #p.connect(p.GUI)
@@ -329,6 +364,7 @@ def main(*argv):
 
     generate_data_imgs(obj=obj, urdf_input=argv[0], env_input=argv[1],
                        eye_xs=eye_xs, eye_ys=eye_ys, eye_zs=eye_zs, tar_ys=tar_ys, tar_zs=tar_zs, door_angles=[0.0])
+
     sys.exit()
 
     for _ in range(24000):  # at least 100 seconds
