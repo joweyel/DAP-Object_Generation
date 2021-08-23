@@ -180,7 +180,8 @@ def generate_datapoint(file_name, bb_door, bb_handle, rotation, axis_is_right, j
     # save images
     if 'rgb_img' in kwargs.keys():
         rgb_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_rgb.jpg')  # or jpg
-        plt.imsave(rgb_out,kwargs['rgb_img'], format='jpg')
+        #plt.imsave(rgb_out,kwargs['rgb_img'], format='jpg', quality=90)
+        cv2.imwrite(rgb_out, cv2.cvtColor(kwargs['rgb_img'],cv2.COLOR_BGR2RGB), [int(cv2.IMWRITE_JPEG_QUALITY), 94])
 
     if 'depth_img' in kwargs.keys():
         depth_out = os.path.join(output_path, 'images/') + file_name.replace('.FORMAT', '_depth.png')
