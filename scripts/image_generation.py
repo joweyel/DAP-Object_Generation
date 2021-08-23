@@ -240,6 +240,14 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                             plane_bb=p.getAABB(obj, linkIndex=0)
                             handle_bb=p.getAABB(obj, linkIndex=1)
 
+                            handle_bb_front_0=[max(handle_bb[0][0], handle_bb[1][0]), handle_bb[0][1], handle_bb[0][2]]
+                            handle_bb_front_1 = [max(handle_bb[0][0], handle_bb[1][0]), handle_bb[1][1], handle_bb[1][2]]
+
+                            img_handle=[world_to_img(world_coord=handle_bb_front_0, projectionMatrix=projectionMatrix,
+                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height),
+                                           world_to_img(world_coord=handle_bb_front_1, projectionMatrix=projectionMatrix,
+                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+
 
 
                             plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
