@@ -249,16 +249,13 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                            world_to_img(world_coord=handle_bb_front_1, projectionMatrix=projectionMatrix,
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height)]
 
-
+                            img_handle_large=get_min_max_bb(bb_in=img_handle, buffer_hor=int(width/40), buffer_ver=int(height/40))
 
                             plane_bb_im = [world_to_img(world_coord=plane_bb[0], projectionMatrix=projectionMatrix,
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height),
                                            world_to_img(world_coord=plane_bb[1], projectionMatrix=projectionMatrix,
                                                         viewMatrix=viewMatrix, imwidth=width, imheight=height)]
-                            handle_bb_im = [world_to_img(world_coord=handle_bb[0], projectionMatrix=projectionMatrix,
-                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height),
-                                           world_to_img(world_coord=handle_bb[1], projectionMatrix=projectionMatrix,
-                                                        viewMatrix=viewMatrix, imwidth=width, imheight=height)]
+
                             door_name=os.path.basename(urdf_input.replace('.urdf', ''))
                             env_name=os.path.basename(env_input.replace('.urdf',''))
 
@@ -276,14 +273,22 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
 
 
                             #axis_img = [clip_axis_point(axis_img[0],axis_img[1],400,400), clip_axis_point(axis_img[1],axis_img[0],400,400)]#clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
-                            if good_image(plane_bb_img=plane_bb_im, handle_bb_img=handle_bb_im, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
+                            if good_image(plane_bb_img=plane_bb_im, handle_bb_img=img_handle, axis_img=axis_img, imwidth=width, imheight=height, min_ec=0.5, ec_weight=1.0,
                                           iou_weight=1.0, min_score=0.7):
                                 generate_datapoint(sample_name,
-                                                   bb_door=plane_bb_im,
-                                                   bb_handle=handle_bb_im,
-                                                   rotation=[clip_axis_point(axis_img[0],axis_img[1],400,400),clip_axis_point(axis_img[1],axis_img[0],400,400)], axis_is_right=axis_is_right, json_path=None,
+                                                   bb_door=get_min_max_bb(bb_in=plane_bb_im),
+                                                   bb_handle=get_min_max_bb(bb_in=[clip_axis_point(img_handle_large[0],img_handle_large[1],400,400),clip_axis_point(img_handle_large[1],img_handle_large[0],400,400)]),
+                                                   rotation=get_min_max_bb([clip_axis_point(axis_img[0],axis_img[1],400,400),clip_axis_point(axis_img[1],axis_img[0],400,400)]), axis_is_right=axis_is_right, json_path=None,
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
+
+def get_min_max_bb(bb_in, buffer_hor=0, buffer_ver=0):
+    max_x = max(bb_in[0][0], bb_in[1][0]) + buffer_hor
+    min_x = min(bb_in[0][0], bb_in[1][0]) - buffer_hor
+    max_y = max(bb_in[0][1], bb_in[1][1]) + buffer_ver
+    min_y = min(bb_in[0][1], bb_in[1][1]) - buffer_ver
+    return [[min_x, min_y], [max_x, max_y]]
+
 
 def clip_to_im(point_2d, imwidth, imheight):
     point_2d[0][0] = int(np.clip(point_2d[0][0], 0, imwidth))
