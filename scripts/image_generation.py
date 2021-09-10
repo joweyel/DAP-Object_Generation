@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import cv2
 from shapely.geometry import box, Polygon, LineString, Point
 import shapely
+import random
 
 
 def check_coverage(bb, imwidth, imheight):
@@ -217,10 +218,15 @@ def set_door_angle(goal_angle, obj):
 def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_ys, tar_zs, door_angles):
     for door_angle in door_angles:
         for eye_x in eye_xs:
+            eye_x = random.uniform(eye_x - abs(eye_x / 20), eye_x + abs(eye_x / 20))
             for eye_y in eye_ys:
+                eye_y = random.uniform(eye_y - abs(eye_y / 20), eye_y + abs(eye_y / 20))
                 for eye_z in eye_zs:
+                    eye_x = random.uniform(eye_z - abs(eye_z / 20), eye_z + abs(eye_z / 20))
                     for tar_y in tar_ys:
+                        tar_y = random.uniform(tar_y - abs(tar_y / 20), tar_y + abs(tar_y / 20))
                         for tar_z in tar_zs:
+                            tar_z = random.uniform(tar_z - abs(tar_z / 20), tar_z + abs(tar_z / 20))
                             viewMatrix = p.computeViewMatrix(
                                 cameraEyePosition=[eye_x, tar_y, eye_z],
                                 cameraTargetPosition=[0, tar_y, tar_z],
@@ -269,7 +275,10 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                 world_to_img(world_coord=axis[0], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
                                              imwidth=width, imheight=height),
                                 world_to_img(world_coord=axis[1], projectionMatrix=projectionMatrix, viewMatrix=viewMatrix,
-                                             imwidth=width, imheight=height)]
+                                             imwidth=width, imheight
+                                             
+                                             
+                                             =height)]
 
 
                             #axis_img = [clip_axis_point(axis_img[0],axis_img[1],400,400), clip_axis_point(axis_img[1],axis_img[0],400,400)]#clip_to_im(point_2d=axis_img, imwidth=width, imheight=height)
@@ -278,7 +287,7 @@ def generate_data_imgs(obj, urdf_input, env_input, eye_xs, eye_ys, eye_zs, tar_y
                                 generate_datapoint(sample_name,
                                                    bb_door=get_min_max_bb(bb_in=plane_bb_im),
                                                    bb_handle=get_min_max_bb(bb_in=[clip_axis_point(img_handle_large[0],img_handle_large[1],400,400),clip_axis_point(img_handle_large[1],img_handle_large[0],400,400)]),
-                                                   rotation=get_min_max_bb([clip_axis_point(axis_img[0],axis_img[1],400,400),clip_axis_point(axis_img[1],axis_img[0],400,400)]), axis_is_right=axis_is_right, json_path=None,
+                                                   rotation=[clip_axis_point(axis_img[0],axis_img[1],400,400),clip_axis_point(axis_img[1],axis_img[0],400,400)], axis_is_right=axis_is_right, json_path=None,
                                                    rgb_img=rgbImg, depth_img=depthImg,
                                                    seg_img=segImg)
 
