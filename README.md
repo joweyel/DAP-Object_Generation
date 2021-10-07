@@ -1,31 +1,7 @@
 # Deep Articulation Prediction - Object Generation
 
-## Convert xacro file to urdf file (executed from `src` directory)
-```rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf```
-
-## Tasks: Week 01.05. - 07.05.
-2. Create a [URDF](src/urdf_xacro/door.urdf) with a door link and a handle link and connect them with a fixed joint. Check in Pybullet if it works.<br>
-`python3 object_examples.py urdf_xacro/door.urdf`
-
-3. Create an indepedendent URDF for the Handles (Only a handle link and parameterize base_link).
-See [door_handle.urdf](src/urdf_xacro/door_handle.urdf)
- for single door knob.<br>
- `python3 object_examples.py urdf_xacro/door_handle.urdf`
-
-4. Try joining both door and handle through Xacro file(Puze is a professional in this). Relevant Files [Xacro](src/urdf_xacro/door_handle.urdf.xacro) & [URDF](src/urdf_xacro/out.urdf)<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`<br>
-`python3 object_examples.py urdf_xacro/out.urdf`
-
-5. Use a Xacro to Urdf script (You can find it in the internet or ask puze) and create a unified URDF. Load it in Pybullet<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`
-
-For Fast changes to the **Xacro-File** and immediate execution use the following commant:<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf && python3 object_examples.py urdf_xacro/out.urdf`
-
 
 ## Generating Data (from the scripts folder)
-
-[Hessenbox-Link](https://hessenbox.tu-darmstadt.de/getlink/MjZkWmh1aHo3QXFwaG0xVmg4NzlN/GIT_data) to bigger files like Blender-files and textures (to avoid tracking all of these files). These files have to be placed in the corrsponding folders.
 
 ### 1. Apply all possible textures to all possible Blender-files with the Python-API of Blender
 [generate_textured_mesh.py](scripts/generate_textured_mesh.py) invokes a python script in the subdirectories of the doors and handles, where it calls the Blender-API for all possible combinations of Objects and Textures (currently only tested for the doors and not the handles)<br>
