@@ -13,12 +13,12 @@
 
 
 ### 2. Generating the separate Xacros for doors and handles
-In [xacroProcessor.py](scripts/xacroProcessor.py) the following values get assigned to the xacros
+In [xacroPiece.py](scripts/xacroPiece.py) the following values get assigned to the xacros
 - **Doors**: mesh gets assigned, scales for (x, y, z) of the door get assigned
 - **Handles**: mesh gets assigned
 
-**Output-Format(door)**: `door_X_Y_{do|ca|cu}sZ.xacro` with `X=#door`, `Y=#texture`, `{do,ca,cu}` stand for `door, cabinet, cupboard` and `Z=scale in [1.0, 2.0]`<br>
-- `door, cabinet, cupboard` have a specific scale sepcified that gets applied instead of the scales in `[1.0, 2.0]`. This can possibly be changed later do allow more variability, also for othe door types (**TODO**)<br>
+**Output-Format(door)**: `door_X_Y_{do|ca|cu}sZ.xacro` with `X=#door`, `Y=#texture`, `{do,ca,cu}` stand for `door, cabinet, cupboard` and `Z=scale in [0.5, 1.0]`<br>
+- `door, cabinet, cupboard` have a specific scale sepcified that gets applied instead of the scales in `[0.5, 1.0]`. This can possibly be changed later do allow more variability, also for othe door types<br>
 
 **Input-Parameters:**
 - `-type` {door|handle}
@@ -29,7 +29,7 @@ In [xacroProcessor.py](scripts/xacroProcessor.py) the following values get assig
 **Output-Folder**: `data/objs/pieces/{doors|handles}/xacro/`<br><br>
 
 ### 3. Generating the Xacros for the whole door (door and handle)
-[xacroDoor.py](scripts/xacroDoor.py) generates the Xacros, which "merge" the sole xacros of the door and handle together and saves them in `data/objs/generated_objs/generated_doors/xacro/`<br>
+[xacroFinal.py](scripts/xacroFinal.py) generates the Xacros, which "merge" the single xacros of the door and handle together and saves them in `data/objs/generated_objs/generated_doors/xacro/`<br>
 The following parameters get assigned to the generated Xacro:<br>
 - **plane_xacro**: xacro of a certain door 
 - **handle_xacro**: xacro of a certain hadle
@@ -52,7 +52,7 @@ This script also converts the generated Xacro's to URDF's and places them in the
 
 
 
-## Important Links
+## Interesting Links (Tutorials etc.)
 
 ### URDF
 [URDF-Tutorials](http://wiki.ros.org/urdf/Tutorials)<br>
