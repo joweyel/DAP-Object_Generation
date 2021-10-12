@@ -44,6 +44,12 @@ This script also converts the generated Xacro's to URDF's and places them in the
 **Output-Format**: `door_X_Y_{do|ca|cu}sZ_hH.urdf`<br>
 **Output-Folder**: `data/objs/generated_objs/generated_doors/urdf/`<br><br><br>
 
+### 4. Generating Dataset
+[generate_all_images.py](scripts/generate_all_images.py) generates images/jsons based on the amount of scenarios given in the >0 integer argument.
+It has to be ensured that the folder structure is kept the way it is in this git as this script is searching the urdfs in the following directories:
+env_path: "../data/objs/generated_objs/generated_envs/urdf"
+door_path: "../data/objs/generated_objs/generated_doors/urdf"
+The resulting images and feature jsons will be saved in "../data/train_data".
 
 --------------------------------------
 
