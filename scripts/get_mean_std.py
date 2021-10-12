@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import cv2
 
+# Torch Dataset for loading image jpgs
 class JPGs(Dataset):
     def __init__(self, data, directory, transform=None):
         self.data = data
@@ -18,6 +19,7 @@ class JPGs(Dataset):
         image = cv2.imread(path, cv2.COLOR_BGR2RGB)
         return image
 
+# Calculate Mean/Std following https://kozodoi.me/python/deep%20learning/pytorch/tutorial/2021/03/08/image-mean-std.html
 def main(path):
     imlist=[f for f in os.listdir(path) if f.endswith('_rgb.jpg')]
     jpg_dataset = JPGs(data=imlist, directory=path, transform=None)
