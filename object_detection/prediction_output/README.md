@@ -1,0 +1,1 @@
+Folder for predictions on images
