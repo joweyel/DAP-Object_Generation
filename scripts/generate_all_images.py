@@ -7,6 +7,7 @@ import itertools
 def main(samples):
     env_path="../data/objs/generated_objs/generated_envs/urdf"
     door_path = "../data/objs/generated_objs/generated_doors/urdf"
+    # Blacklist of discarded wal/door combinations
     bright_walls = ["wall_white", "wall_concrete"]
     bright_doors = ["_6_dos", "_7_dos", "_9_dos", "_11_dos", "_6_cus", "_7_cus", "_9_cus", "_11_cus", "_6_cas",
                     "_7_cas", "_9_cas", "_11_cas"]
@@ -14,6 +15,7 @@ def main(samples):
     door_urdfs = [f for f in os.listdir(door_path) if f.endswith('.urdf')]
     combinations = list(itertools.product(env_urdfs,door_urdfs))
     random.shuffle(combinations)
+    # Call image generation for sample random combinations of env and door
     for combination in combinations:
         if samples==0:
             break

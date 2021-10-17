@@ -1,31 +1,7 @@
 # Deep Articulation Prediction - Object Generation
 
-## Convert xacro file to urdf file (executed from `src` directory)
-```rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf```
-
-## Tasks: Week 01.05. - 07.05.
-2. Create a [URDF](src/urdf_xacro/door.urdf) with a door link and a handle link and connect them with a fixed joint. Check in Pybullet if it works.<br>
-`python3 object_examples.py urdf_xacro/door.urdf`
-
-3. Create an indepedendent URDF for the Handles (Only a handle link and parameterize base_link).
-See [door_handle.urdf](src/urdf_xacro/door_handle.urdf)
- for single door knob.<br>
- `python3 object_examples.py urdf_xacro/door_handle.urdf`
-
-4. Try joining both door and handle through Xacro file(Puze is a professional in this). Relevant Files [Xacro](src/urdf_xacro/door_handle.urdf.xacro) & [URDF](src/urdf_xacro/out.urdf)<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`<br>
-`python3 object_examples.py urdf_xacro/out.urdf`
-
-5. Use a Xacro to Urdf script (You can find it in the internet or ask puze) and create a unified URDF. Load it in Pybullet<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf`
-
-For Fast changes to the **Xacro-File** and immediate execution use the following commant:<br>
-`rosrun xacro xacro urdf_xacro/door_handle.urdf.xacro > urdf_xacro/out.urdf && python3 object_examples.py urdf_xacro/out.urdf`
-
 
 ## Generating Data (from the scripts folder)
-
-[Hessenbox-Link](https://hessenbox.tu-darmstadt.de/getlink/MjZkWmh1aHo3QXFwaG0xVmg4NzlN/GIT_data) to bigger files like Blender-files and textures (to avoid tracking all of these files). These files have to be placed in the corrsponding folders.
 
 ### 1. Apply all possible textures to all possible Blender-files with the Python-API of Blender
 [generate_textured_mesh.py](scripts/generate_textured_mesh.py) invokes a python script in the subdirectories of the doors and handles, where it calls the Blender-API for all possible combinations of Objects and Textures (currently only tested for the doors and not the handles)<br>
@@ -37,12 +13,12 @@ For Fast changes to the **Xacro-File** and immediate execution use the following
 
 
 ### 2. Generating the separate Xacros for doors and handles
-In [xacroProcessor.py](scripts/xacroProcessor.py) the following values get assigned to the xacros
+In [xacroPiece.py](scripts/xacroPiece.py) the following values get assigned to the xacros
 - **Doors**: mesh gets assigned, scales for (x, y, z) of the door get assigned
 - **Handles**: mesh gets assigned
 
-**Output-Format(door)**: `door_X_Y_{do|ca|cu}sZ.xacro` with `X=#door`, `Y=#texture`, `{do,ca,cu}` stand for `door, cabinet, cupboard` and `Z=scale in [1.0, 2.0]`<br>
-- `door, cabinet, cupboard` have a specific scale sepcified that gets applied instead of the scales in `[1.0, 2.0]`. This can possibly be changed later do allow more variability, also for othe door types (**TODO**)<br>
+**Output-Format(door)**: `door_X_Y_{do|ca|cu}sZ.xacro` with `X=#door`, `Y=#texture`, `{do,ca,cu}` stand for `door, cabinet, cupboard` and `Z=scale in [0.5, 1.0]`<br>
+- `door, cabinet, cupboard` have a specific scale sepcified that gets applied instead of the scales in `[0.5, 1.0]`. This can possibly be changed later do allow more variability, also for othe door types<br>
 
 **Input-Parameters:**
 - `-type` {door|handle}
@@ -53,7 +29,7 @@ In [xacroProcessor.py](scripts/xacroProcessor.py) the following values get assig
 **Output-Folder**: `data/objs/pieces/{doors|handles}/xacro/`<br><br>
 
 ### 3. Generating the Xacros for the whole door (door and handle)
-[xacroDoor.py](scripts/xacroDoor.py) generates the Xacros, which "merge" the sole xacros of the door and handle together and saves them in `data/objs/generated_objs/generated_doors/xacro/`<br>
+[xacroFinal.py](scripts/xacroFinal.py) generates the Xacros, which "merge" the single xacros of the door and handle together and saves them in `data/objs/generated_objs/generated_doors/xacro/`<br>
 The following parameters get assigned to the generated Xacro:<br>
 - **plane_xacro**: xacro of a certain door 
 - **handle_xacro**: xacro of a certain hadle
@@ -68,6 +44,12 @@ This script also converts the generated Xacro's to URDF's and places them in the
 **Output-Format**: `door_X_Y_{do|ca|cu}sZ_hH.urdf`<br>
 **Output-Folder**: `data/objs/generated_objs/generated_doors/urdf/`<br><br><br>
 
+### 4. Generating Dataset
+[generate_all_images.py](scripts/generate_all_images.py) generates images/jsons based on the amount of scenarios given in the >0 integer argument.
+It has to be ensured that the folder structure is kept the way it is in this git as this script is searching the urdfs in the following directories:
+env_path: "../data/objs/generated_objs/generated_envs/urdf"
+door_path: "../data/objs/generated_objs/generated_doors/urdf"
+The resulting images and feature jsons will be saved in "../data/train_data".
 
 --------------------------------------
 
@@ -76,7 +58,7 @@ This script also converts the generated Xacro's to URDF's and places them in the
 
 
 
-## Important Links
+## Interesting Links (Tutorials etc.)
 
 ### URDF
 [URDF-Tutorials](http://wiki.ros.org/urdf/Tutorials)<br>
