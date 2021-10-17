@@ -53,6 +53,13 @@ The resulting images and feature jsons will be saved in "../data/train_data".
 
 --------------------------------------
 
+## Object Detection with detectron2
+```
+python3 detection_model.py --model <path/to/model.pth> \
+                           --mode <train or evaluate> \
+                           --data <path/to/dataset>
+```
+
 
 
 
