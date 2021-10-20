@@ -53,6 +53,18 @@ The resulting images and feature jsons will be saved in "../data/train_data".
 
 --------------------------------------
 
+## Object Detection with detectron2
+```
+python3 detection_model.py --model <path/to/model.pth> \
+                           --mode <train or evaluate> \
+                           --data <path/to/dataset>
+```
+Models can be located anywhere when loading, but if the model is trained, the new trained model is located in the `output`-folder.
+ 
+When specifying `train` the program creates a `train`-Object, that can be used to train the model with the given Parameters.
+
+The `data`-Parameter specifies the folder where the training- an test-data is located. You can place this data inside the `data`-folder.
+
 
 
 
